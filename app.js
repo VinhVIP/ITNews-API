@@ -20,11 +20,11 @@ app.use((req, res, next) => {
     next();
 })
 
-// app.use('/', (req, res) => {
-//     return res.json({
-//         message: 'okokok'
-//     });
-// })
+app.use('/', (req, res) => {
+    return res.json({
+        message: 'oke'
+    });
+})
 
 app.use('/book', bookRouter);
 
