@@ -2,8 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
-const pool = require("./database");
-// let bookRouter = require('./api/routers/book');
+var bookRouter = require('./api/routers/book');
 
 // use the express-static middleware
 app.use(express.static("public"))
@@ -22,13 +21,23 @@ app.use((req, res, next) => {
     next();
 })
 
+if (process.env.NODE_ENV === 'production') {
+    //set static folder
+    app.use(express.static('client/build'));
+}
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+});
+
+app.use('/book', bookRouter);
+
 app.use('/test', (req, res) => {
     return res.json({
         message: 'test oke'
     });
 })
 
-app.use('/book', require('./api/routers/book'));
+
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
