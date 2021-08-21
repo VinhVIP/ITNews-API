@@ -22,11 +22,11 @@ app.use((req, res, next) => {
     next();
 })
 
-// app.use('/', (req, res) => {
-//     return res.json({
-//         message: 'oke'
-//     });
-// })
+app.use('/test', (req, res) => {
+    return res.json({
+        message: 'test oke'
+    });
+})
 
 app.use('/book', bookRouter);
 
