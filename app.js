@@ -3,7 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const pool = require("./database");
-let bookRouter = require('./api/routers/book');
+// let bookRouter = require('./api/routers/book');
 
 // use the express-static middleware
 app.use(express.static("public"))
@@ -28,7 +28,7 @@ app.use('/test', (req, res) => {
     });
 })
 
-app.use('/book', bookRouter);
+app.use('/book', require('./api/routers/book'));
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
