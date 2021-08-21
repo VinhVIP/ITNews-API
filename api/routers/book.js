@@ -4,9 +4,6 @@ const router = express.Router();
 const Book = require('../module/book');
 
 router.get('/', async (req, res, next) => {
-    return res.json({
-        message: 'ALO'
-    });
     if (Object.keys(req.query).length === 0) {
         // GET tất cả sách
         const allBooks = await Book.selectAll();
