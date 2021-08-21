@@ -4,9 +4,11 @@ Sử dụng hệ cơ sở dữ liệu PostgreSQL
 
 https://openplanning.net/10713/cai-dat-co-so-du-lieu-postgresql-tren-windows
 
-## Tạo bảng
+## Tạo database + table
 
 ```sql
+create database book_db;
+
 create table book (
 	id integer primary key,
 	name char(30) not null,
