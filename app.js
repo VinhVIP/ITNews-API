@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const pool = require("./database");
 let bookRouter = require('./api/routers/book');
 
+// use the express-static middleware
+app.use(express.static("public"))
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
