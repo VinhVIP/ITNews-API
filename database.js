@@ -22,9 +22,19 @@ pool.on('error', (err) => {
     process.exit(-1);
 })
 
-pool.query("SELECT * from book", [], (err, res) => {
-    if (err) console.log(err);
-    else console.log(res.rows);
-})
+// pool.query("SELECT * from book", [], (err, res) => {
+//     if (err) console.log(err);
+//     else console.log(res.rows);
+// })
+
+// pool.query(`create table book (
+// 	id integer primary key,
+// 	name varchar(30) not null,
+// 	author varchar(30) not null,
+// 	type varchar(30) not null
+// )`, [], (err, res) => {
+//     if (err) console.log(err);
+//     else console.log(res.rows);
+// })
 
 module.exports = pool;
