@@ -4,12 +4,12 @@
 
 -- Tạo bảng Chức vụ --
 
-CREATE TABLE chucvu (
-	id_chucvu serial PRIMARY KEY,
+CREATE TABLE role (
+	id_role serial PRIMARY KEY,
 	name varchar(30) UNIQUE
 );
 
-INSERT INTO chucvu 
+INSERT INTO role 
 VALUES
 (1, 'Admin'),
 (2, 'Moder'),
@@ -20,7 +20,7 @@ VALUES
 
 CREATE TABLE account(
 	id_account serial PRIMARY KEY,
-	id_chucvu serial NOT NULL,
+	id_role serial NOT NULL,
 	account_name varchar(50) UNIQUE,
 	real_name varchar(50) NOT NULL,
 	email varchar(50),
@@ -29,23 +29,23 @@ CREATE TABLE account(
 	birth date,
 	gender smallint default 0,
 	-- gender:
-	-- 0: Nam
-	-- 1: Nữ
-	-- 2: Không rõ
+		-- 0: Nam
+		-- 1: Nữ
+		-- 2: Không rõ
 	company text,
 	phone varchar(15),
 	create_date date default CURRENT_DATE,
 	status smallint default 0,
 	-- status:
-	-- 0: Hoạt động
-	-- 1: Khóa có thời hạn
-	-- 2: Khóa vĩnh viễn
+		-- 0: Hoạt động
+		-- 1: Khóa có thời hạn
+		-- 2: Khóa vĩnh viễn
 
-	FOREIGN KEY (id_chucvu) REFERENCES chucvu(id_chucvu)
+	FOREIGN KEY (id_role) REFERENCES role(id_role)
 );
 
 INSERT INTO account 
-(id_account, id_chucvu, account_name, real_name, email, password)
+(id_account, id_role, account_name, real_name, email, password)
 VALUES
 (1, 1, 'adminvippro', 'Donal Admin', 'admin.itnews@gmail.com', 'dnvjdnvosnvodnv'),
 (2, 3, 'vinh', 'Quang Vinh', 'vinhvip@gmail.com', 'mypasswordshouldbehide'),
@@ -98,14 +98,14 @@ CREATE TABLE post(
 	view integer default 0,
 	status smallint default 0,
 	-- status: 
-	-- 0: Chờ kiểm duyệt
-	-- 1: Đã kiểm duyệt
-	-- 2: Spam
+		-- 0: Chờ kiểm duyệt
+		-- 1: Đã kiểm duyệt
+		-- 2: Spam
 	access smallint default 0,
 	-- access: 
-	-- 0: Nháp
-	-- 1: Công khai
-	-- 2: Chỉ có link mới xem được
+		-- 0: Nháp
+		-- 1: Công khai
+		-- 2: Chỉ có link mới xem được
 
 	FOREIGN KEY (id_account) REFERENCES account (id_account)
 );	
@@ -151,8 +151,8 @@ CREATE TABLE comment(
 	id_cmt_parent integer default 0,
 	status smallint default 0,
 	-- status:
-	-- 0: Hiện
-	-- 1: Ẩn
+		-- 0: Hiện
+		-- 1: Ẩn
 
 	FOREIGN KEY (id_account) REFERENCES account(id_account),
 	FOREIGN KEY (id_post) REFERENCES post(id_post)
@@ -180,8 +180,8 @@ CREATE TABLE vote(
 	id_post serial,
 	type smallint default 0,
 	-- type:
-	-- 0: upvote
-	-- 1: downvote
+		-- 0: upvote
+		-- 1: downvote
 
 	PRIMARY KEY (id_account, id_post),
 
