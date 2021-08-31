@@ -48,7 +48,11 @@ app.use((error, req, res, next) => {
 // Account
 app.use(`${apiUrl}/account`, require('./api/v1/routers/account'));
 
-// Chucvu
+// Role
 app.use(`${apiUrl}/role`, require('./api/v1/routers/role'));
+
+// Tag
+app.use(`${apiUrl}/tag`, require('./api/v1/routers/tag'));
+
 
 module.exports = app;
