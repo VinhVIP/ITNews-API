@@ -1,0 +1,36 @@
+### Đăng nhập
+POST http://localhost:8000/api/v1/account/login
+Content-Type: application/json
+
+{
+    "account_name": "vinhit",
+    "password": "12456"
+}
+
+### Lấy tất cả tài khoản
+GET http://localhost:8000/api/v1/account/all
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo1LCJpZF9yb2xlIjozLCJhY2NvdW50X25hbWUiOiJ2aW5oaXQiLCJpYXQiOjE2MzA0MDMyNDAsImV4cCI6MTYzMDQwNjg0MH0.kAokZo3WcLunbDgeirnM4XichCGwkDrlQ2q0sYXLP0I
+
+
+### Lấy thông tin tài khoản theo id
+PUT http://localhost:8000/api/v1/account/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjozLCJhY2NvdW50X25hbWUiOiJhZG1pbnZpcHBybyIsInJlYWxfbmFtZSI6IkRvbmFsIEFkbWluIiwiaWRfcm9sZSI6MSwic3RhdHVzIjowLCJpYXQiOjE2MzAzNzg0MjYsImV4cCI6MTYzMDM4MjAyNn0.5WqEP4oYN4u46i4a9oKnvAsvIj2HTjSUxhLmCKnrHrA
+Content-Type: application/json
+
+{
+    "real_name": "TQ Vinh",
+    "birth": "2000-02-06",
+    "gender": 0,
+    "company": "PTITHCM",
+    "phone": "0372621750",
+    "avatar": "/public/vinh.jpg"
+}
+
+### Thay đổi chức vụ tài khoản
+PUT http://localhost:8000/api/v1/account/5/role/0
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjozLCJhY2NvdW50X25hbWUiOiJhZG1pbnZpcHBybyIsInJlYWxfbmFtZSI6IkRvbmFsIEFkbWluIiwiaWRfcm9sZSI6MSwic3RhdHVzIjowLCJpYXQiOjE2MzAzODE3NjEsImV4cCI6MTYzMDM4NTM2MX0.tNVtM9-dnFgcLmTCAdTHr35byiiaew_swOOZFWgOmXg
+
+
+### Thay đổi trạng thái tài khoản
+PUT http://localhost:8000/api/v1/account/5/status/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjozLCJpZF9yb2xlIjoyLCJpYXQiOjE2MzAzODI2NjQsImV4cCI6MTYzMDM4NjI2NH0.RYNBC9Khypk_cN4HODkjis_Uxmu2s_jhidvvw-LhFqU

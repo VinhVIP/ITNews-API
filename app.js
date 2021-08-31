@@ -1,14 +1,19 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 
-var bookRouter = require('./api/routers/book');
+dotenv.config();
 
-// use the express-static middleware
-app.use(express.static("public"))
+const apiUrl = '/api/v1';
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.json());
+
+// for parsing application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+// for parsing multipart/form-data
+// app.use(upload.array());
+app.use(express.static('public'));
 
 
 app.use((req, res, next) => {
@@ -19,28 +24,31 @@ app.use((req, res, next) => {
         return res.status(200).json({});
     }
     next();
-})
+});
 
-app.use('/book', bookRouter);
-
-app.use('/test', (req, res) => {
-    return res.json({
-        message: 'test oke'
-    });
-})
-
-
-
-app.use((req, res, next) => {
-    const error = new Error('Not found');
-    error.status = 404;
-    next(error);
-})
+// app.use((req, res, next) => {
+//     const error = new Error('Not found');
+//     error.status = 404;
+//     next(error);
+// });
 
 app.use((error, req, res, next) => {
     res.status(error.status || 500).json({
         message: error
     })
-})
+});
+
+
+// My API
+
+// Upload file
+// app.use('/img', require('./api/v0/routers/file'));
+
+
+// Account
+app.use(`${apiUrl}/account`, require('./api/v1/routers/account'));
+
+// Chucvu
+app.use(`${apiUrl}/role`, require('./api/v1/routers/role'));
 
 module.exports = app;
