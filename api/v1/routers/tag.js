@@ -1,10 +1,15 @@
-const e = require('express');
 const express = require('express');
 const router = express.Router();
 var Auth = require('../../../auth');
 
 var Tag = require('../module/tag');
 
+/**
+ * Lấy tất cả thẻ
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về danh sách các thẻ
+ */
 router.get('/all', async (req, res, next) => {
     try {
         let result = await Tag.selectAll();
@@ -18,6 +23,13 @@ router.get('/all', async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy 1 thẻ theo id
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về thẻ cần lấy
+ *              404: Không tìm thấy thể
+ */
 router.get('/:id', async (req, res, next) => {
     try {
         let result = await Tag.selectId(req.params.id);
@@ -37,6 +49,13 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
+/**
+ * Thêm mới 1 thẻ
+ * 
+ * @permisson   Chỉ Moder trở lên mới được thêm thẻ mới
+ * @return      201: Thêm thành công, trả về thẻ vừa được thêm
+ *              400: Thiếu dữ liệu (tên thẻ)
+ */
 router.post('/', Auth.authenGTModer, async (req, res, next) => {
     try {
         let { name } = req.body;
@@ -59,6 +78,14 @@ router.post('/', Auth.authenGTModer, async (req, res, next) => {
     }
 })
 
+/**
+ * Chỉnh sửa 1 thẻ theo id
+ * 
+ * @permisson   Chỉ Moder trở lên mới được thực thi
+ * @return      200: Cập nhật thành công, trả về thẻ sau khi thay đổi
+ *              400: Thiếu dữ liệu
+ *              404: Không tìm thấy thẻ để sửa
+ */
 router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
     try {
         let id = req.params.id;

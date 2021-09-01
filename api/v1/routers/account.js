@@ -17,7 +17,8 @@ router.post('/login', async (req, res, next) => {
             var data = {
                 "id_account": result.data.id_account,
                 "id_role": result.data.id_role,
-                "account_name": result.data.account_name
+                "account_name": result.data.account_name,
+                "status": result.data.status
             }
 
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
@@ -267,7 +268,8 @@ router.put('/:id/role/:id_role_new', Auth.authenGTModer, async (req, res, next) 
  * @permission  Moder trở lên mới được phép thực thi
  *              Không thể thay đổi cho chức vụ ngang hàng trở lên
  * @return      200: Thành công, trả về thông tin tài khoản sau khi cập nhật
- *              400: Giá t
+ *              400: Giá trị trạng thái không hợp lệ
+ *              403: Không có quyền thực thi
  */
 router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next) => {
     try {

@@ -54,5 +54,8 @@ app.use(`${apiUrl}/role`, require('./api/v1/routers/role'));
 // Tag
 app.use(`${apiUrl}/tag`, require('./api/v1/routers/tag'));
 
+// Post
+app.use(`${apiUrl}/post`, require('./api/v1/routers/post'));
+
 
 module.exports = app;

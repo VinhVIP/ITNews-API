@@ -1,0 +1,45 @@
+### Get a post by id
+GET http://localhost:8000/api/v1/post/1
+
+### Post
+POST http://localhost:8000/api/v1/post
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNDc4NTY3LCJleHAiOjE2MzA0ODIxNjd9.-9PbTPAKBFFI4UNkMG54tY86M-A0WeVvM7kLOX3ZPgY
+Content-Type: application/json
+
+{
+    "title": "My title test post_tag",
+    "content": "Ahihi vsđs",
+    "tags": [
+        1,2
+    ]
+}
+
+### Cập nhật bài viết
+PUT http://localhost:8000/api/v1/post/4
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTEwMzA5LCJleHAiOjE2MzA1MTM5MDl9.B59Hiy8KioaNltRqGHKttFHuWkhk0p19NRd6ovzKAEM
+Content-Type: application/json
+
+{
+    "title": "My title update",
+    "content": "Ahihi nap, odsokvldsv  vsđs",
+    "tags": [
+        3,5
+    ]
+}
+
+
+### Thay đổi status của bài viết
+PUT http://localhost:8000/api/v1/post/3/status/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNDc4NTY3LCJleHAiOjE2MzA0ODIxNjd9.-9PbTPAKBFFI4UNkMG54tY86M-A0WeVvM7kLOX3ZPgY
+
+
+### Thay đổi access của bài viế
+PUT http://localhost:8000/api/v1/post/3/access/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTEzNjQ0LCJleHAiOjE2MzA1MTcyNDR9.xBHx69NSBtcRPCPq2I24LQawt5wEHJpr2aasmGwObZU
+
+
+### Xóa bài viết
+DELETE http://localhost:8000/api/v1/post/6
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LCJpZF9yb2xlIjoyLCJhY2NvdW50X25hbWUiOiJhYmNkIiwic3RhdHVzIjoyLCJpYXQiOjE2MzA0ODczMjAsImV4cCI6MTYzMDQ5MDkyMH0.uJQ6LlbZ845g0UH1m_dYpyOBQjx6BU0ZPM8fqp0emeg
+
+
