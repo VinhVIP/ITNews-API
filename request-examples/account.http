@@ -34,3 +34,7 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjozLC
 ### Thay đổi trạng thái tài khoản
 PUT http://localhost:8000/api/v1/account/5/status/1
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTA2NzAwLCJleHAiOjE2MzA1MTAzMDB9.NMVKkGVLQJeoJy0KMbYAguipybak92vwQP2uhdhu_PQ
+
+
+### Lấy tất cả bài viết cùa tài khoản
+GET http://localhost:8000/api/v1/account/1/posts

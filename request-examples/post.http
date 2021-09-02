@@ -16,11 +16,11 @@ Content-Type: application/json
 
 ### Cập nhật bài viết
 PUT http://localhost:8000/api/v1/post/4
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTEwMzA5LCJleHAiOjE2MzA1MTM5MDl9.B59Hiy8KioaNltRqGHKttFHuWkhk0p19NRd6ovzKAEM
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTczNjA5LCJleHAiOjE2MzA1NzcyMDl9.M1GsTRx_gWnVXtOFWGlcVs7aUCPJY_moZR_iUC7GNFM
 Content-Type: application/json
 
 {
-    "title": "My title update",
+    "title": "1234231",
     "content": "Ahihi nap, odsokvldsv  vsđs",
     "tags": [
         3,5
@@ -42,4 +42,20 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLC
 DELETE http://localhost:8000/api/v1/post/6
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LCJpZF9yb2xlIjoyLCJhY2NvdW50X25hbWUiOiJhYmNkIiwic3RhdHVzIjoyLCJpYXQiOjE2MzA0ODczMjAsImV4cCI6MTYzMDQ5MDkyMH0.uJQ6LlbZ845g0UH1m_dYpyOBQjx6BU0ZPM8fqp0emeg
 
+
+### Lấy danh sách bài viết theo trang
+GET http://localhost:8000/api/v1/post/page/1
+
+### Lấy danh sách bài viết NHÁP
+GET http://localhost:8000/api/v1/post/drafts
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
+
+### Lấy danh sách bài viết PUBLIC
+GET http://localhost:8000/api/v1/post/public
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
+
+
+### Lấy danh sách bài viết UNLISTED: Chỉ có link mới xem
+GET http://localhost:8000/api/v1/post/unlisted
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
 

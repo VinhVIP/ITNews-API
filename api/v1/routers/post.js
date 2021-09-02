@@ -7,6 +7,95 @@ var Post = require('../module/post');
 var Tag = require('../module/tag');
 var Account = require('../module/account');
 
+
+/**
+ * Lấy tất cả các bài viết NHÁP của bản thân
+ * 
+ * @permission  Đăng nhập mới được thực hiện
+ * @return      200: Thành công, trả về danh sách bài viết
+ */
+ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let accId = Auth.tokenData(req).id_account;
+        let postsId = await Post.getDraftPosts(accId);
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectId(postsId[i].id_post);
+            data.push({
+                post: post.data.post,
+                tags: post.data.tags
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết nháp thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tất cả các bài viết PUBLIC của bản thân
+ * 
+ * @permission  Đăng nhập mới được thực hiện
+ * @return      200: Thành công, trả về danh sách bài viết
+ */
+ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let accId = Auth.tokenData(req).id_account;
+        let postsId = await Post.getPublicPosts(accId);
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectId(postsId[i].id_post);
+            data.push({
+                post: post.data.post,
+                tags: post.data.tags
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết nháp thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy tất cả các bài viết UNLISTED của bản thân
+ * 
+ * @permission  Đăng nhập mới được thực hiện
+ * @return      200: Thành công, trả về danh sách bài viết
+ */
+ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let accId = Auth.tokenData(req).id_account;
+        let postsId = await Post.getUnlistedPosts(accId);
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectId(postsId[i].id_post);
+            data.push({
+                post: post.data.post,
+                tags: post.data.tags
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết nháp thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 /**
  * Lấy 1 bài viết theo id
  * 
@@ -313,5 +402,36 @@ router.put('/:id/access/:access_new', Auth.authenGTUser, async (req, res, next) 
         res.sendStatus(500);
     }
 })
+
+/**
+ * Lấy các bài viết public mới nhất theo trang
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/page/:page', async (req, res, next) => {
+    try {
+        let page = req.params.page;
+        let postsId = await Post.getNewestPage(page);
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectId(postsId[i].id_post);
+            data.push({
+                post: post.data.post,
+                tags: post.data.tags
+            });
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
 
 module.exports = router;

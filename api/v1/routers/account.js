@@ -5,6 +5,7 @@ const router = express.Router();
 
 const Account = require('../module/account');
 const Role = require('../module/role');
+const Post = require('../module/post');
 
 var Auth = require('../../../auth');
 
@@ -24,7 +25,7 @@ router.post('/login', async (req, res, next) => {
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '3600s'
             });
-            
+
             res.status(200).json({
                 message: 'Đăng nhập thành công',
                 accessToken
@@ -320,6 +321,34 @@ router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next)
         res.status(500).json({
             message: 'Something wrong'
         })
+    }
+})
+
+/**
+ * Lấy tất cả bài viết (public, đã kiểm duyệt) của một tài khoản
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết public, đã kiểm duyệt của tài khoản
+ */
+router.get('/:id/posts', async (req, res, next) => {
+    try {
+        let idAcc = req.params.id;
+        let postsId = await Post.getListPostIdOfAccount(idAcc);
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let p = await Post.selectId(postsId[i].id_post);
+            data.push({
+                post: p.data.post,
+                tags: p.data.tags
+            });
+        }
+        res.status(200).json({
+            message: 'Lấy danh sách cấc bài viết của tài khoản thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
 })
 
