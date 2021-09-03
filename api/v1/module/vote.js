@@ -65,4 +65,24 @@ db.update = (id_account, id_post, type) => {
     })
 }
 
+db.getUpVotes = (id_post) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=0",
+            [id_post], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    })
+}
+
+db.getDownVotes = (id_post) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=1",
+            [id_post], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    })
+}
+
 module.exports = db;

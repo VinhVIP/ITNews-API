@@ -59,3 +59,12 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLC
 GET http://localhost:8000/api/v1/post/unlisted
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
 
+### Lấy danh sách UP vote của bài viết
+GET http://localhost:8000/api/v1/post/2/voteup
+
+
+### Lấy danh sách DOWN vote của bài viết
+GET http://localhost:8000/api/v1/post/1/votedown
+
+### Lấy ĐIỂM vote của bài viết
+GET http://localhost:8000/api/v1/post/1/vote

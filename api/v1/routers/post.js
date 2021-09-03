@@ -6,6 +6,7 @@ var Auth = require('../../../auth');
 var Post = require('../module/post');
 var Tag = require('../module/tag');
 var Account = require('../module/account');
+var Vote = require('../module/vote');
 
 
 /**
@@ -14,7 +15,7 @@ var Account = require('../module/account');
  * @permission  Đăng nhập mới được thực hiện
  * @return      200: Thành công, trả về danh sách bài viết
  */
- router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
+router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
     try {
         let accId = Auth.tokenData(req).id_account;
         let postsId = await Post.getDraftPosts(accId);
@@ -43,7 +44,7 @@ var Account = require('../module/account');
  * @permission  Đăng nhập mới được thực hiện
  * @return      200: Thành công, trả về danh sách bài viết
  */
- router.get('/public', Auth.authenGTUser, async (req, res, next) => {
+router.get('/public', Auth.authenGTUser, async (req, res, next) => {
     try {
         let accId = Auth.tokenData(req).id_account;
         let postsId = await Post.getPublicPosts(accId);
@@ -73,7 +74,7 @@ var Account = require('../module/account');
  * @permission  Đăng nhập mới được thực hiện
  * @return      200: Thành công, trả về danh sách bài viết
  */
- router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
+router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
     try {
         let accId = Auth.tokenData(req).id_account;
         let postsId = await Post.getUnlistedPosts(accId);
@@ -432,6 +433,95 @@ router.get('/page/:page', async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy số lượng và danh sách UP VOTE của bài viết
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về số lượng và dữ liệu vote
+ *              404: Bài viết không tồn tại
+ */
+router.get('/:id/voteup', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+        let postExists = await Post.has(id);
+        if (postExists) {
+            let result = await Vote.getUpVotes(id);
+            res.status(200).json({
+                message: 'Lấy danh sách vote up thành công',
+                data: {
+                    total: result.length,
+                    vote: result
+                }
+            })
+        } else {
+            res.status(404).json({
+                message: 'Bài viết không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
+/**
+ * Lấy số lượng và danh sách DOWN VOTE của bài viết
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về số lượng và dữ liệu vote
+ *              404: Bài viết không tồn tại
+ */
+router.get('/:id/votedown', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+        let postExists = await Post.has(id);
+        if (postExists) {
+            let result = await Vote.getDownVotes(id);
+            res.status(200).json({
+                message: 'Lấy danh sách vote down thành công',
+                data: {
+                    total: result.length,
+                    vote: result
+                }
+            })
+        } else {
+            res.status(404).json({
+                message: 'Bài viết không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Trả về điểm vote của bài viết: mark = up - down
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về điểm
+ *              404: Bài viết không tồn tại
+ */
+router.get('/:id/vote', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+        let postExists = await Post.has(id);
+        if (postExists) {
+            let voteUp = await Vote.getUpVotes(id);
+            let voteDown = await Vote.getDownVotes(id);
+            res.status(200).json({
+                message: 'Lấy điểm vote thành công',
+                data: voteUp.length - voteDown.length
+            })
+        } else {
+            res.status(404).json({
+                message: 'Bài viết không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
 module.exports = router;
