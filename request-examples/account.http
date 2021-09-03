@@ -38,3 +38,10 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLC
 
 ### Lấy tất cả bài viết cùa tài khoản
 GET http://localhost:8000/api/v1/account/1/posts
+
+
+### Lấy danh sách các bookmark
+GET http://localhost:8000/api/v1/account/3/bookmarks
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjU3OTE4LCJleHAiOjE2MzA2NjE1MTh9.ftWgh1kaeAFvl0BL_L2At7k0O57Ls1IH1_kfXOQ2QTo
+
+

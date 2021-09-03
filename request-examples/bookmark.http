@@ -1,0 +1,10 @@
+### Thêm bookmark
+POST http://localhost:8000/api/v1/bookmark/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjU2ODgxLCJleHAiOjE2MzA2NjA0ODF9.9tHkeWY7T_NXc1IyZXhGEGLwwdiQkf_xCg3vMe9M09Y
+
+
+### Xóa bookmark
+DELETE http://localhost:8000/api/v1/bookmark/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjU2ODgxLCJleHAiOjE2MzA2NjA0ODF9.9tHkeWY7T_NXc1IyZXhGEGLwwdiQkf_xCg3vMe9M09Y
+
+

@@ -6,6 +6,7 @@ const router = express.Router();
 const Account = require('../module/account');
 const Role = require('../module/role');
 const Post = require('../module/post');
+const Bookmark = require('../module/bookmark');
 
 var Auth = require('../../../auth');
 
@@ -352,5 +353,37 @@ router.get('/:id/posts', async (req, res, next) => {
     }
 })
 
+
+/**
+ * Lấy danh sách bài viết bookmark của 1 tài khoản
+ * 
+ * @permission  Đăng nhập mới được thực thi
+ * @return      200: Thành công, trả về số lượng + id các bài viết đã bookmark của tài khoản này
+ *              404: Tài khoản không tồn tại
+ */
+router.get('/:id/bookmarks', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id = req.params.id;
+
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let result = await Bookmark.list(id);
+            res.status(200).json({
+                message: 'Lấy danh sách bookmark thành công',
+                data: {
+                    total: result.length,
+                    bookmark: result
+                }
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
 module.exports = router;

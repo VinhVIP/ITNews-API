@@ -60,5 +60,7 @@ app.use(`${apiUrl}/post`, require('./api/v1/routers/post'));
 // Vote
 app.use(`${apiUrl}/vote`, require('./api/v1/routers/vote'));
 
+// Bookmark
+app.use(`${apiUrl}/bookmark`, require('./api/v1/routers/bookmark'));
 
 module.exports = app;
