@@ -99,7 +99,7 @@ router.get('/:id', async (req, res, next) => {
  * @return      200: trả về chức vụ của tài khoản cần tìm
  *              404: Không tìm thấy tìm khoản 
  */
-router.get('/:id/chucvu', async (req, res, next) => {
+router.get('/:id/role', async (req, res, next) => {
     try {
         let accountExists = await Account.has(id);
 

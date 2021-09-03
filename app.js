@@ -57,5 +57,8 @@ app.use(`${apiUrl}/tag`, require('./api/v1/routers/tag'));
 // Post
 app.use(`${apiUrl}/post`, require('./api/v1/routers/post'));
 
+// Vote
+app.use(`${apiUrl}/vote`, require('./api/v1/routers/vote'));
+
 
 module.exports = app;

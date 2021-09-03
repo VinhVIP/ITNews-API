@@ -1,0 +1,17 @@
+### Thêm vote
+POST http://localhost:8000/api/v1/vote/3/0
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjQwNDM1LCJleHAiOjE2MzA2NDQwMzV9.Ddy566IRg1vpiK3UjkkZfusZksQrqzzGxErJ31oxQ0E
+
+### Get Vote
+GET http://localhost:8000/api/v1/vote/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjQwNDM1LCJleHAiOjE2MzA2NDQwMzV9.Ddy566IRg1vpiK3UjkkZfusZksQrqzzGxErJ31oxQ0E
+
+
+### Xóa vote
+DELETE http://localhost:8000/api/v1/vote/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjQwNDM1LCJleHAiOjE2MzA2NDQwMzV9.Ddy566IRg1vpiK3UjkkZfusZksQrqzzGxErJ31oxQ0E
+
+
+### Sửa vote
+PUT http://localhost:8000/api/v1/vote/12/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjQwNDM1LCJleHAiOjE2MzA2NDQwMzV9.Ddy566IRg1vpiK3UjkkZfusZksQrqzzGxErJ31oxQ0E
