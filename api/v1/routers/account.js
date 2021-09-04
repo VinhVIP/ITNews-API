@@ -7,6 +7,8 @@ const Account = require('../module/account');
 const Role = require('../module/role');
 const Post = require('../module/post');
 const Bookmark = require('../module/bookmark');
+const FollowTag = require('../module/follow_tag');
+const FollowAccount = require('../module/follow_account');
 
 var Auth = require('../../../auth');
 
@@ -370,10 +372,7 @@ router.get('/:id/bookmarks', Auth.authenGTUser, async (req, res, next) => {
             let result = await Bookmark.list(id);
             res.status(200).json({
                 message: 'Lấy danh sách bookmark thành công',
-                data: {
-                    total: result.length,
-                    bookmark: result
-                }
+                data: result
             })
         } else {
             res.status(404).json({
@@ -385,5 +384,90 @@ router.get('/:id/bookmarks', Auth.authenGTUser, async (req, res, next) => {
         res.sendStatus(500);
     }
 })
+
+
+/**
+ * Lấy danh sách các thẻ mà tài khoản đang follow
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các thẻ đang follow
+ *              404: Tài khoản k tồn tại
+ */
+router.get('/:id/follow_tag', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let result = await FollowTag.list(id);
+
+            res.status(200).json({
+                message: 'Lấy danh sách các thẻ mà tài khoản theo dõi thành công',
+                data: result
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy danh sách tài khoản theo dõi TK có id cho trước
+ */
+router.get('/:id/following', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let result = await FollowAccount.listFollowingOf(id);
+
+            res.status(200).json({
+                message: 'Lấy danh sách các tài khoản theo dõi người này thành công',
+                data: result
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy danh sách tài khoản mà TK có id cho trước theo dõi
+ */
+ router.get('/:id/follower', async (req, res, next) => {
+    try {
+        let id = req.params.id;
+
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let result = await FollowAccount.listFollowerOf(id);
+
+            res.status(200).json({
+                message: 'Lấy danh sách các tài khoản mà người này theo dõi thành công',
+                data: result
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 
 module.exports = router;

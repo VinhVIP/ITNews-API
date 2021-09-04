@@ -1,0 +1,8 @@
+### Follow tag
+POST http://localhost:8000/api/v1/follow_tag/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI0MjA1LCJleHAiOjE2MzA3Mjc4MDV9.jhYPQzcNO1L2FJJ-elPBW1K8o6EBT_gaLJupX0WClaQ
+
+
+### unfollow tag
+DELETE http://localhost:8000/api/v1/follow_tag/5
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjgyNTI3LCJleHAiOjE2MzA2ODYxMjd9.sb0eDkAs9PPtVFDsjnYFHHE0rbj_Xq5aGjF9wLmm0q0

@@ -13,9 +13,9 @@ db.selectAll = () => {
 
 db.has = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT EXISTS (SELECT * FROM tag WHERE id_tag=$1)", [id], (err, result) => {
+        pool.query("SELECT name FROM tag WHERE id_tag=$1", [id], (err, result) => {
             if (err) return reject(err);
-            return resolve(result.rows[0].exists);
+            return resolve(result.rowCount > 0);
         })
     })
 }
@@ -25,7 +25,7 @@ db.selectId = (id) => {
         pool.query("SELECT * FROM tag WHERE id_tag=$1", [id], (err, result) => {
             if (err) return reject(err);
             console.log(result.rows);
-            if (result.rows.length > 0) {
+            if (result.rowCount > 0) {
                 return resolve({ status: true, data: result.rows[0] });
             } else {
                 return resolve({ status: false });

@@ -1,0 +1,10 @@
+### Follow
+POST http://localhost:8000/api/v1/follow_account/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzIzMDY4LCJleHAiOjE2MzA3MjY2Njh9.294H3DHmtKsIoEc2mNwzIEmK55cVd13j7kkqSH5f_pI
+
+
+### UnFollow
+DELETE http://localhost:8000/api/v1/follow_account/3
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzIzMDY4LCJleHAiOjE2MzA3MjY2Njh9.294H3DHmtKsIoEc2mNwzIEmK55cVd13j7kkqSH5f_pI
+
+

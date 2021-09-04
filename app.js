@@ -63,4 +63,11 @@ app.use(`${apiUrl}/vote`, require('./api/v1/routers/vote'));
 // Bookmark
 app.use(`${apiUrl}/bookmark`, require('./api/v1/routers/bookmark'));
 
+// Follow Tag
+app.use(`${apiUrl}/follow_tag`, require('./api/v1/routers/follow_tag'));
+
+// Follow Account
+app.use(`${apiUrl}/follow_account`, require('./api/v1/routers/follow_account'));
+
+
 module.exports = app;

@@ -233,17 +233,19 @@ VALUES
 
 -- FOLLOW Account --
 
+-- following theo dõi follower
+
 CREATE TABLE follow_account(
-	id_account serial,
-	id_account_follower serial,
+	id_follower serial,
+	id_following serial,
 
-	PRIMARY KEY(id_account, id_account_follower),
+	PRIMARY KEY(id_follower, id_following),
 
-	FOREIGN KEY (id_account) REFERENCES account(id_account),
-	FOREIGN KEY (id_account_follower) REFERENCES account(id_account)
+	FOREIGN KEY (id_follower) REFERENCES account(id_account),
+	FOREIGN KEY (id_following) REFERENCES account(id_account)
 );
 
-INSERT INTO follow_account(id_account, id_account_follower)
+INSERT INTO follow_account(id_follower, id_following)
 VALUES
 (2, 1);
 

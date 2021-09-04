@@ -41,7 +41,17 @@ GET http://localhost:8000/api/v1/account/1/posts
 
 
 ### Lấy danh sách các bookmark
-GET http://localhost:8000/api/v1/account/3/bookmarks
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNjU3OTE4LCJleHAiOjE2MzA2NjE1MTh9.ftWgh1kaeAFvl0BL_L2At7k0O57Ls1IH1_kfXOQ2QTo
+GET http://localhost:8000/api/v1/account/1/bookmarks
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI0MjA1LCJleHAiOjE2MzA3Mjc4MDV9.jhYPQzcNO1L2FJJ-elPBW1K8o6EBT_gaLJupX0WClaQ
 
 
+### Lấy danh sách các tag đang follow
+GET http://localhost:8000/api/v1/account/1/follow_tag
+
+
+### Lấy danh sách các tài khoản đang được người có id này theo dõi
+GET http://localhost:8000/api/v1/account/1/follower
+
+
+### Lấy danh sách các tài khoản theo dõi người có id này
+GET http://localhost:8000/api/v1/account/2/following
