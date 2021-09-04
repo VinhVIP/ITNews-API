@@ -42,7 +42,10 @@ db.has = (id) => {
 
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM account WHERE id_account=$1",
+        pool.query(`SELECT A.id_account, A.id_role, R.name role_name, A.real_name, A.email, A.avatar, A.birth, A.company, A.phone, A.create_date, A.status
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$1`,
             [id],
             (err, result) => {
                 if (err) return reject(err);

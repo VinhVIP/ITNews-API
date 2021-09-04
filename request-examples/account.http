@@ -3,7 +3,7 @@ POST http://localhost:8000/api/v1/account/login
 Content-Type: application/json
 
 {
-    "account_name": "admin",
+    "account_name": "abcd",
     "password": "123456"
 }
 
@@ -46,7 +46,7 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLC
 
 
 ### Lấy danh sách các tag đang follow
-GET http://localhost:8000/api/v1/account/1/follow_tag
+GET http://localhost:8000/api/v1/account/8/follow_tag
 
 
 ### Lấy danh sách các tài khoản đang được người có id này theo dõi

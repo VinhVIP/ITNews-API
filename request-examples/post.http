@@ -43,12 +43,18 @@ DELETE http://localhost:8000/api/v1/post/6
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LCJpZF9yb2xlIjoyLCJhY2NvdW50X25hbWUiOiJhYmNkIiwic3RhdHVzIjoyLCJpYXQiOjE2MzA0ODczMjAsImV4cCI6MTYzMDQ5MDkyMH0.uJQ6LlbZ845g0UH1m_dYpyOBQjx6BU0ZPM8fqp0emeg
 
 
-### Lấy danh sách bài viết theo trang
-GET http://localhost:8000/api/v1/post/page/1
+### Lấy danh sách bài viết mới nhất theo trang
+GET http://localhost:8000/api/v1/post/newest/1
+
+
+### Lấy danh sách bài viết từ tài khoản và tag follow theo trang
+GET http://localhost:8000/api/v1/post/following/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LCJpZF9yb2xlIjoyLCJhY2NvdW50X25hbWUiOiJhYmNkIiwic3RhdHVzIjoyLCJpYXQiOjE2MzA3Nzc5MTQsImV4cCI6MTYzMDc4MTUxNH0.gvH9aCoQ85MGDKwr6LMMe_Smkre-oWFhmlwY_hCm0eo
+
 
 ### Lấy danh sách bài viết NHÁP
 GET http://localhost:8000/api/v1/post/drafts
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI1ODg4LCJleHAiOjE2MzA3Mjk0ODh9.MGOkihM9f5bDD8vJD_qsNAcJO76RAghAHVUVDbLEBx4
 
 ### Lấy danh sách bài viết PUBLIC
 GET http://localhost:8000/api/v1/post/public

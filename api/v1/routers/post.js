@@ -107,15 +107,23 @@ router.get('/:id', async (req, res, next) => {
     try {
         let id = req.params.id;
 
-        let result = await Post.selectId(id);
-        if (result.status) {
+        let postExists = await Post.has(id);
+        if (postExists) {
+            let post = await Post.selectId(id);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id);
+
             res.status(200).json({
                 message: 'Lấy bài viết thành công',
-                data: result.data
+                data: {
+                    post: post,
+                    author: acc,
+                    tags: tags
+                }
             })
         } else {
             res.status(404).json({
-                message: 'Không tìm thấy bài viết'
+                message: 'Bài viết không tồn tại'
             })
         }
     } catch (error) {
@@ -199,6 +207,7 @@ router.post('/', Auth.authenGTUser, async (req, res, next) => {
  * Chỉnh sửa bài viết theo id
  * 
  * @permission  Chỉ người viết bài mới được sửa
+ *              Tài khoản bị khóa không thẻ sửa bài
  * @return      200: Cập nhật thành công
  *              400: Thiếu dữ liệu
  *              403: Không thể sửa bài viết của người khác
@@ -210,6 +219,13 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
 
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let post = await Post.selectId(id_post);
+
+        // Tài khoản bị khóa
+        if (acc.status != 0) {
+            return res.status(403).json({
+                message: 'Tài khoản đã bị khóa, không thể sửa bài'
+            })
+        }
 
         if (post.status) {
             // Người viết mới được sửa
@@ -277,6 +293,7 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
  * Xóa bài viết theo id
  * 
  * @permission  Chỉ người viết mới được xóa bài
+ *              Tài khoản bị khóa không thể xóa bài
  * @return      200: Xóa thành công
  *              401: Không thể xóa bài viết của người khác
  *              404: Không tìm thấy bài viết để xóa
@@ -284,14 +301,20 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
 router.delete('/:id', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id = req.params.id;
-        let accUser = await Account.selectId(Auth.tokenData(req).id_account);
+        let acc = await Account.selectId(Auth.tokenData(req).id_account);
+
+        // Tài khoản bị khóa
+        if (acc.status != 0) {
+            return res.status(403).json({
+                message: 'Tài khoản đã bị khóa, không thể xóa bài'
+            })
+        }
 
         let postExists = await Post.has(id);
         if (postExists) {
             // Chỉ người viết hoặc Admin mới được xóa bài
-            // TODO: Chưa làm admin
-            let checkAuthor = await Post.checkPostAuthor(id, accUser.id_account);
-            if (checkAuthor) {
+            let checkAuthor = await Post.checkPostAuthor(id, acc.id_account);
+            if (checkAuthor || acc.id_role == 0) {
                 await Post.deletePost(id);
                 res.status(200).json({
                     message: 'Xóa bài viết thành công'
@@ -409,17 +432,25 @@ router.put('/:id/access/:access_new', Auth.authenGTUser, async (req, res, next) 
  * @permisson   Ai cũng có thể thực thi
  * @return      200: Thành công, trả về các bài viết thuộc trang
  */
-router.get('/page/:page', async (req, res, next) => {
+router.get('/newest/:page', async (req, res, next) => {
     try {
         let page = req.params.page;
         let postsId = await Post.getNewestPage(page);
+
         let data = [];
+        
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
             data.push({
-                post: post.data.post,
-                tags: post.data.tags
-            });
+                post: post,
+                    author: acc,
+                    tags: tags
+            })
         }
 
         res.status(200).json({
@@ -431,6 +462,46 @@ router.get('/page/:page', async (req, res, next) => {
         res.sendStatus(500);
     }
 })
+
+
+/**
+ * Lấy các bài viết thuộc tag follow và tài khoản follow mới nhất theo trang
+ * 
+ * @permisson   Đăng nhập mới được thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/following/:page', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let page = req.params.page;
+        let postsId = await Post.getFollowingPage(id_account, page);
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                    author: acc,
+                    tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 
 /**
  * Lấy số lượng và danh sách UP VOTE của bài viết
