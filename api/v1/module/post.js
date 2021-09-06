@@ -220,4 +220,19 @@ db.getUnlistedPosts = (id_account) => {
     })
 }
 
+db.getPostOfTag = (id_tag, page) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT P.id_post
+        FROM post p
+        JOIN post_tag PT ON P.id_post = PT.id_post
+        WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
+        ORDER BY P.created DESC
+        LIMIT 10 OFFSET $2`,
+            [id_tag, (page - 1) * 10], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows)
+            })
+    })
+}
+
 module.exports = db;
