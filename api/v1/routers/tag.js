@@ -3,6 +3,8 @@ const router = express.Router();
 var Auth = require('../../../auth');
 
 var Tag = require('../module/tag');
+var Post = require('../module/post');
+var Account = require('../module/account');
 
 /**
  * Lấy tất cả thẻ
@@ -112,6 +114,44 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
             })
         }
 
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+router.get('/:id/posts/:page', async (req, res, next) => {
+    try {
+        let { id, page } = req.params;
+
+        let tagExists = await Tag.has(id);
+        if (tagExists) {
+            let postsId = await Post.getPostOfTag(id, page);
+            let data = [];
+
+            for (let i = 0; i < postsId.length; i++) {
+                let id_post = postsId[i].id_post;
+
+                let post = await Post.selectId(id_post);
+                let acc = await Account.selectId(post.id_account);
+                let tags = await Post.selectTagsOfPost(id_post);
+
+                data.push({
+                    post: post,
+                    author: acc,
+                    tags: tags
+                })
+            }
+
+            res.status(200).json({
+                message: `Lấy danh sách bài viết thành công`,
+                data: data
+            })
+        } else {
+            res.status(404).json({
+                message: 'Thẻ không tồn tại'
+            })
+        }
     } catch (error) {
         console.log(error);
         res.sendStatus(500);

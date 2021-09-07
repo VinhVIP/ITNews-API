@@ -71,6 +71,24 @@ db.addPostTag = (id_post, id_tag) => {
     })
 }
 
+db.getView = (id) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT view FROM post WHERE id_post=$1", [id], (err, result) => {
+            if (err) return reject(err);
+            return resolve(result.rows[0]);
+        })
+    })
+}
+
+db.updateView = (id, view) => {
+    return new Promise((resolve, reject) => {
+        pool.query("UPDATE post SET view=$1 WHERE id_post=$2", [view, id], (err, result) => {
+            if (err) return reject(err);
+            return resolve(result.rows[0]);
+        })
+    })
+}
+
 db.changeStatus = (id_post, status_new) => {
     return new Promise((resolve, reject) => {
         pool.query("UPDATE post SET status=$1 WHERE id_post=$2 RETURNING *",
@@ -216,6 +234,21 @@ db.getUnlistedPosts = (id_account) => {
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
+            })
+    })
+}
+
+db.getPostOfTag = (id_tag, page) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT P.id_post
+        FROM post p
+        JOIN post_tag PT ON P.id_post = PT.id_post
+        WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
+        ORDER BY P.created DESC
+        LIMIT 10 OFFSET $2`,
+            [id_tag, (page - 1) * 10], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows)
             })
     })
 }

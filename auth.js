@@ -4,6 +4,8 @@ const auth = {};
 
 auth.tokenData = (req) => {
     const authorizationHeader = req.headers['authorization'];
+    if (!authorizationHeader) return null;
+
     const token = authorizationHeader.split(' ')[1];
     var result = null;
 

@@ -22,3 +22,6 @@ Content-Type: application/json
     "name": "iOS - Swift",
     "logo": "/public/abcd.jpg"
 }
+
+### Lấy danh sách bài viết có thẻ id và trang
+GET http://localhost:8000/api/v1/tag/2/posts/1
