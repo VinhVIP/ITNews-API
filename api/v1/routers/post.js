@@ -101,6 +101,7 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
  * 
  * @permission  Ai cũng có thể thực thi
  * @return      200: Thành công, trả về bài viết + các tags của bài viết
+ *              403: Không có quyền xem bài viết
  *              404: Không tìm thấy bài viết  
  */
 router.get('/:id', async (req, res, next) => {
@@ -110,17 +111,68 @@ router.get('/:id', async (req, res, next) => {
         let postExists = await Post.has(id);
         if (postExists) {
             let post = await Post.selectId(id);
-            let acc = await Account.selectId(post.id_account);
+            let author = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id);
 
-            res.status(200).json({
-                message: 'Lấy bài viết thành công',
-                data: {
-                    post: post,
-                    author: acc,
-                    tags: tags
+            let visitor = Auth.tokenData(req);
+            if (visitor == null) {
+                console.log("guest");
+                if (post.status === 1 && post.access !== 0) {
+                    // Những bài viết [đã kiểm duyệt] && [công khai || có link]
+                    let curView = (await Post.getView(id)).view;
+                    await Post.updateView(id, curView + 1);
+
+                    post.view++;
+
+                    res.status(200).json({
+                        message: 'Lấy bài viết thành công',
+                        data: {
+                            post: post,
+                            author: author,
+                            tags: tags
+                        }
+                    })
+                } else {
+                    return res.status(403).json({
+                        message: 'Bạn không có quyền truy cập'
+                    })
                 }
-            })
+            } else {
+                let user = await Account.selectId(visitor.id_account);
+                if (user.id_role <= 2 || user.id_account === post.id_account) {
+                    // Moder trở lên hoặc chính tác giả
+                    // Hoặc bài viết là công khai
+                    // Không tính view
+
+                    return res.status(200).json({
+                        message: 'Lấy bài viết thành công',
+                        data: {
+                            post: post,
+                            author: author,
+                            tags: tags
+                        }
+                    })
+                } else if (post.status === 1 && post.access !== 0) {
+                    let curView = (await Post.getView(id)).view;
+                    await Post.updateView(id, curView + 1);
+
+                    post.view++;
+
+                    return res.status(200).json({
+                        message: 'Lấy bài viết thành công',
+                        data: {
+                            post: post,
+                            author: author,
+                            tags: tags
+                        }
+                    })
+                } else {
+                    return res.status(403).json({
+                        message: 'Bạn không có quyền truy cập'
+                    })
+                }
+            }
+
         } else {
             res.status(404).json({
                 message: 'Bài viết không tồn tại'
@@ -438,7 +490,7 @@ router.get('/newest/:page', async (req, res, next) => {
         let postsId = await Post.getNewestPage(page);
 
         let data = [];
-        
+
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
@@ -448,8 +500,8 @@ router.get('/newest/:page', async (req, res, next) => {
 
             data.push({
                 post: post,
-                    author: acc,
-                    tags: tags
+                author: acc,
+                tags: tags
             })
         }
 
@@ -487,8 +539,8 @@ router.get('/following/:page', Auth.authenGTUser, async (req, res, next) => {
 
             data.push({
                 post: post,
-                    author: acc,
-                    tags: tags
+                author: acc,
+                tags: tags
             })
         }
 

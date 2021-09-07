@@ -1,5 +1,7 @@
 ### Get a post by id
-GET http://localhost:8000/api/v1/post/1
+GET http://localhost:8000/api/v1/post/6
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo5LCJpZF9yb2xlIjozLCJhY2NvdW50X25hbWUiOiJodXkiLCJzdGF0dXMiOjAsImlhdCI6MTYzMDk4NTg2NSwiZXhwIjoxNjMwOTg5NDY1fQ.3rQMXJs3hzq4phl2-uPVpKIQpJYP6znJqwpip8SnA7U
+
 
 ### Post
 POST http://localhost:8000/api/v1/post
