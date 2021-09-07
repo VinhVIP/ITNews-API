@@ -9,6 +9,7 @@ const Post = require('../module/post');
 const Bookmark = require('../module/bookmark');
 const FollowTag = require('../module/follow_tag');
 const FollowAccount = require('../module/follow_account');
+const Vote = require('../module/vote');
 
 var Auth = require('../../../auth');
 
@@ -418,6 +419,10 @@ router.get('/:id/follow_tag', async (req, res, next) => {
 
 /**
  * Lấy danh sách tài khoản theo dõi TK có id cho trước
+ * 
+ * @permission  Ai cũng có thể thực hiện
+ * @return      200: Thành công, trả về danh sách tài khoản 
+ *              404: Tài khoản không tồn tại
  */
 router.get('/:id/following', async (req, res, next) => {
     try {
@@ -445,8 +450,12 @@ router.get('/:id/following', async (req, res, next) => {
 
 /**
  * Lấy danh sách tài khoản mà TK có id cho trước theo dõi
+ * 
+ * @permission  Ai cũng có thể thực hiện
+ * @return      200: Thành công, trả về danh sách tài khoản 
+ *              404: Tài khoản không tồn tại
  */
- router.get('/:id/follower', async (req, res, next) => {
+router.get('/:id/follower', async (req, res, next) => {
     try {
         let id = req.params.id;
 
@@ -469,5 +478,69 @@ router.get('/:id/following', async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy điểm vote (mark) của người dùng có id
+ *      mark = totalVoteUp - totalVoteDown
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về {mark, up, down}, mark = up-down
+ *              404: Tài khoản không tồn tại
+ */
+router.get('/:id/mark', async (req, res, next) => {
+    try {
+        let { id } = req.params;
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let totalUp = await Vote.getTotalVoteUp(id);
+            let totalDown = await Vote.getTotalVoteDown(id);
+
+            let mark = totalUp - totalDown;
+            res.status(200).json({
+                message: 'Lấy tổng điểm thành công',
+                data: {
+                    mark: mark,
+                    up: totalUp,
+                    down: totalDown
+                }
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tổng số lượt xem tất cả bài viết mà người dùng đã viết
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về tổng số lượt xem
+ *              404: Tài khoản không tồn tại
+ */
+router.get('/:id/view', async (req, res, next) => {
+    try {
+        let { id } = req.params;
+        let accExists = await Account.has(id);
+        if (accExists) {
+            let totalView = (await Post.getTotalView(id)) ?? 0;
+
+            res.status(200).json({
+                message: 'Lấy tổng số lượt xem thành công',
+                data: parseInt(totalView)
+            })
+        } else {
+            res.status(404).json({
+                message: 'Tài khoản không tồn tại'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
 module.exports = router;

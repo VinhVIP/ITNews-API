@@ -55,3 +55,10 @@ GET http://localhost:8000/api/v1/account/1/follower
 
 ### Lấy danh sách các tài khoản theo dõi người có id này
 GET http://localhost:8000/api/v1/account/2/following
+
+
+### Lấy điểm vote của người dùng có id
+GET http://localhost:8000/api/v1/account/3/mark
+
+### Lấy tổng số lượt xem bài viết của người dùng có id
+GET http://localhost:8000/api/v1/account/1/view
