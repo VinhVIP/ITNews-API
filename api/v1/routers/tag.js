@@ -120,6 +120,13 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy danh sách bài viết thuộc thẻ có id theo trang
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: thành công, trả về danh sách
+ *              404: Thẻ không tồn tại
+ */
 router.get('/:id/posts/:page', async (req, res, next) => {
     try {
         let { id, page } = req.params;

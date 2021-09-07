@@ -253,4 +253,14 @@ db.getPostOfTag = (id_tag, page) => {
     })
 }
 
+db.getTotalView = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT SUM(P.view) FROM post P WHERE P.id_account=$1",
+            [id_account], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0].sum);
+            })
+    })
+}
+
 module.exports = db;

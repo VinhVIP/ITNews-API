@@ -62,4 +62,13 @@ db.listFollowingOf = (id_account) => {
     })
 }
 
+db.deleteAll = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query("DELETE FROM follow_account WHERE id_following=$1", [id_account], (err, result) => {
+            if (err) return reject(err);
+            return resolve(result);
+        })
+    })
+}
+
 module.exports = db;

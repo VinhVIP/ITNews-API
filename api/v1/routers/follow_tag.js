@@ -6,6 +6,14 @@ const Auth = require('../../../auth');
 const Tag = require('../module/tag');
 const FollowTag = require('../module/follow_tag');
 
+/**
+ * Người dùng theo dõi 1 tag
+ * 
+ * @permission  Đăng nhập
+ * @return      200: Theo dõi thẻ thành công
+ *              400: Thẻ đã theo dõi trước đó
+ *              404: Thẻ không tồn tại
+ */
 router.post('/:id_tag', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id_tag = req.params.id_tag;
@@ -35,6 +43,14 @@ router.post('/:id_tag', Auth.authenGTUser, async (req, res, next) => {
     }
 })
 
+/**
+ * Người dùng bỏ theo dõi 1 tag
+ * 
+ * @permission  Đăng nhập
+ * @return      200: Bỏ theo dõi thẻ thành công
+ *              400: Thẻ chưa được theo dõi trước đó
+ *              404: Thẻ không tồn tại
+ */
 router.delete('/:id_tag', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id_tag = req.params.id_tag;
@@ -60,6 +76,25 @@ router.delete('/:id_tag', Auth.authenGTUser, async (req, res, next) => {
                 message: 'Thẻ không tồn tại'
             })
         }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Người dùng bỏ theo dõi tất cả thẻ
+ * 
+ * @permission  Đăng nhập
+ * @return      200: Thành công
+ */
+router.delete('/', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        await FollowTag.deleteAll(id_account);
+        res.status(200).json({
+            message: 'Bỏ theo dõi tất cả thẻ thành công'
+        })
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
