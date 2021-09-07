@@ -47,4 +47,13 @@ db.list = (id_account) => {
     })
 }
 
+db.deleteAll = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query("DELETE FROM follow_tag WHERE id_account=$1", [id_account], (err, result) => {
+            if (err) return reject(err);
+            return resolve(result);
+        })
+    })
+}
+
 module.exports = db;

@@ -8,3 +8,8 @@ DELETE http://localhost:8000/api/v1/follow_account/3
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzIzMDY4LCJleHAiOjE2MzA3MjY2Njh9.294H3DHmtKsIoEc2mNwzIEmK55cVd13j7kkqSH5f_pI
 
 
+### UnFollow All Account
+DELETE http://localhost:8000/api/v1/follow_account
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LCJpZF9yb2xlIjoyLCJhY2NvdW50X25hbWUiOiJhYmNkIiwic3RhdHVzIjoyLCJpYXQiOjE2MzEwMDI5NDIsImV4cCI6MTYzMTAwNjU0Mn0.t7wNs48SWF_FthSujR5MDun3KZZC8k-NKq-zCe9fvWQ
+
+
