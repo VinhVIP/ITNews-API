@@ -646,4 +646,48 @@ router.get('/:id/vote', async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy các bài viết theo status, theo trang
+ * 
+ * @permission  Moder trở lên (xem để kiểm duyệt)
+ * @return      200: Thành công. trả về danh sách bài viết
+ *              400: Giá trị status không hợp lệ
+ */
+router.get('/status/:status/:page', Auth.authenGTModer, async (req, res, next) => {
+    try {
+        let { status, page } = req.params;
+        if (status >=0  || status <= 2) {
+            let postsId = await Post.getPostsByStatus(status, page);
+
+            let data = [];
+
+            for (let i = 0; i < postsId.length; i++) {
+                let id_post = postsId[i].id_post;
+
+                let post = await Post.selectId(id_post);
+                let acc = await Account.selectId(post.id_account);
+                let tags = await Post.selectTagsOfPost(id_post);
+
+                data.push({
+                    post: post,
+                    author: acc,
+                    tags: tags
+                })
+            }
+
+            res.status(200).json({
+                message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
+                data: data
+            })
+        } else {
+            res.status(400).json({
+                message: 'Giá trị trạng thái không hợp lệ'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 module.exports = router;

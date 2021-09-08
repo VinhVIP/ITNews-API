@@ -263,4 +263,14 @@ db.getTotalView = (id_account) => {
     })
 }
 
+db.getPostsByStatus = (status, page) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT id_post FROM post P WHERE P.status=$1 ORDER BY P.created DESC LIMIT 10 OFFSET $2",
+            [status, page], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    })
+}
+
 module.exports = db;

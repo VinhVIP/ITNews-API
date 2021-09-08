@@ -76,3 +76,9 @@ GET http://localhost:8000/api/v1/post/1/votedown
 
 ### Lấy ĐIỂM vote của bài viết
 GET http://localhost:8000/api/v1/post/1/vote
+
+### Lấy danh sách bài viết theo status
+GET http://localhost:8000/api/v1/post/status/1/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMxMDY4MTg0LCJleHAiOjE2MzEwNzE3ODR9.Vilkub32A9iXoiRH5YNt1JNTCXzqBTy2FaKlt4Y1Rls
+
+
