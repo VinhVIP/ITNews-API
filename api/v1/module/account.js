@@ -68,6 +68,17 @@ db.selectRole = (id) => {
     })
 }
 
+db.selectName = (id_account)=>{
+    return new Promise((resolve ,reject)=>{
+        pool.query('SELECT real_name FROM account WHERE id_account = $1',
+        [id_account],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0].real_name);
+        })
+    })
+}
+
 db.add = (account) => {
     return new Promise((resolve, reject) => {
         pool.query("INSERT INTO account (account_name, real_name, email, password, id_role) VALUES ($1,$2,$3,$4,$5) RETURNING id_account",

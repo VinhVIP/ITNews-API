@@ -6,6 +6,8 @@ var Post = require('../module/post');
 var Tag = require('../module/tag');
 var Account = require('../module/account');
 var Vote = require('../module/vote');
+var Notification = require('../module/notification');
+var FollowAccount = require('../module/follow_account');
 
 
 /**
@@ -413,6 +415,16 @@ router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next)
 
         if (postExists) {
             let result = await Post.changeStatus(id, status_new);
+            let isPublic = await Post.isPublic(id);
+
+            if (status_new == 1 && isPublic){
+                let poster = await Post.selectId(id);
+                let id_followers = await FollowAccount.listFollowingOfLite(poster.id_account);
+                for(let id_follower of id_followers){
+                    let name = await Account.selectName(id_follower.id_follower);
+                    Notification.addNotification(id_follower.id_follower, `${name} đã đăng một bài viết mới`, `/post/${id}`)
+                }
+            }
 
             res.status(200).json({
                 message: 'Cập nhật trạng thái bài viết thành công',

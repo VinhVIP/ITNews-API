@@ -47,6 +47,17 @@ db.listFollowerOf = (id_account) => {
     })
 }
 
+db.listFollowingOfLite = (id_account)=>{
+    return new Promise((resolve ,reject)=>{
+        pool.query('SELECT id_follower FROM follow_account WHERE id_following = $1',
+        [id_account],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows)
+        })
+    })
+}
+
 // Những tài khoản theo dõi id_account
 db.listFollowingOf = (id_account) => {
     return new Promise((resolve, reject) => {

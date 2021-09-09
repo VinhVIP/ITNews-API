@@ -69,5 +69,14 @@ app.use(`${apiUrl}/follow_tag`, require('./api/v1/routers/follow_tag'));
 // Follow Account
 app.use(`${apiUrl}/follow_account`, require('./api/v1/routers/follow_account'));
 
+// Comment
+app.use(`${apiUrl}/post`, require('./api/v1/routers/comment'));
+
+// update image
+app.use(`${apiUrl}/image`, require('./api/v1/routers/image'));
+
+// notification
+app.use(`${apiUrl}/notification`, require('./api/v1/routers/notification'));
+
 
 module.exports = app;
