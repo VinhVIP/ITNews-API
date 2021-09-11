@@ -5,7 +5,15 @@ var Account = require('../module/account');
 var Notification = require('../module/notification');
 
 
-
+/**
+ * Xóa thông báo
+ * @permisson   Người được nhận thông báo đó
+ *              
+ * @return      200: Đổi ảnh thành công
+ *              400: Lỗi tải file
+ *              401: Tải khoản không có quyền
+ *              404: Thông báo không tồn tại
+ */
 router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
     try{
         let id_notificatioin = req.params.id_notification;
@@ -37,9 +45,14 @@ router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
     }
 });
 
+/**
+ * Lấy thông báo theo trang
+ * @permisson   Tải khoản được tạo
+ * 
+ * @return      200: Lấy thành công
+ */
 router.get('/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
     try{
-        // let page = Number();
         let page = req.params.page_number;
         let id_account = Auth.tokenData(req).id_account;
         let amount = await Notification.amount(id_account);
@@ -55,19 +68,13 @@ router.get('/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
     }
 });
 
-// router.post('/account/:id_account/', async(req, res, next)=>{
-//     try{
-//         let id_account = req.params.id_account;
-//         let content = 'Gửi thông báo có id ' + id_account;
-//         let notify = await Notification.addNotification(id_account, content, 'abcdefg');
-//         return res.status(200).json({
-//             message: 'gui thanh cong'
-//         })
-//     }catch(err){
-//         return res.sendStatus(500);
-//     }
-// });
-
+/**
+ * Vô thông báo để xác nhận đã xem
+ * @permisson   Tài khoản đã tạo
+ *              
+ * @return      200: Vô thành công, trả về link để vô trang cần đến
+ *              404: Thông báo không tồn tại
+ */
 router.get('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
     try{
         let id_notificatioin = req.params.id_notification;

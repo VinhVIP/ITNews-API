@@ -3,7 +3,7 @@ POST http://localhost:8000/api/v1/account/login
 Content-Type: application/json
 
 {
-    "account_name": "account3",
+    "account_name": "admin2",
     "password": "123456"
 }
 
@@ -11,6 +11,27 @@ Content-Type: application/json
 GET http://localhost:8000/api/v1/account/all
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTA2NzAwLCJleHAiOjE2MzA1MTAzMDB9.NMVKkGVLQJeoJy0KMbYAguipybak92vwQP2uhdhu_PQ
 
+### Tạo tài khoản
+POST http://localhost:8000/api/v1/account
+Content-Type: application/json
+
+{
+    "account_name":"admin2",
+    "real_name": "Beerus Sama",
+    "email": "beerus@gmail.com",
+    "password":"123456"
+}
+
+### Khóa tài khoản
+POST http://localhost:8000/api/v1/account/11/ban
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxMywiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoiYWRtaW4yIiwic3RhdHVzIjowLCJpYXQiOjE2MzEzMzM4ODIsImV4cCI6MTYzMTMzNzQ4Mn0.AaM8YmZcBGYWpGR4EUQi3R6DJWzmetZE0_eNbaP1LBU
+Content-Type: application/json
+
+{
+    "hours_lock": "1",
+
+    "reason": "Khoa choi cho vui"
+}
 
 ### Sửa thông tin tài khoản theo id
 PUT http://localhost:8000/api/v1/account/5

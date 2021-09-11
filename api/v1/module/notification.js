@@ -24,17 +24,6 @@ db.deleteNotification = (id_notification)=>{
     });
 }
 
-// db. = ()=>{
-//     return new Promise((resolve ,reject)=>{
-//         pool.query('',
-//         [],
-//         (err, result)=>{
-//             if(err) return reject(err);
-//             return resolve(result.rows[0])
-//         })
-//     })
-// }
-
 db.has = (id_notificatioin)=>{
     return new Promise((resolve ,reject)=>{
         pool.query('SELECT id_notification FROM notification WHERE id_notification = $1',

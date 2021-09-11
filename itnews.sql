@@ -64,8 +64,6 @@ CREATE TABLE lock_account(
 	time_start_lock timestamp without time zone default CURRENT_TIMESTAMP,
 	hours_lock smallint,
 
-	PRIMARY KEY (id_account_lock, id_account_boss),
-
 	FOREIGN KEY (id_account_lock) REFERENCES account(id_account),
 	FOREIGN KEY (id_account_boss) REFERENCES account(id_account)
 );

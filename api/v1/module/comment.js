@@ -4,7 +4,7 @@ const db = {};
 
 db.addComment = (id_account, id_post, content) =>{
     return new Promise((resolve, reject)=>{
-        pool.query("INSERT INTO comment (id_account, id_post, content, date_time, status) VALUES ($1, $2, $3, current_date, 0) RETURNING id_cmt",
+        pool.query("INSERT INTO comment (id_account, id_post, content, status) VALUES ($1, $2, $3, 0) RETURNING id_cmt",
         [id_account, id_post, content],
         (err, result)=>{
             if (err) return reject(err);

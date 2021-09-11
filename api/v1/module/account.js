@@ -20,9 +20,42 @@ db.checkAccount = (account) => {
     })
 }
 
-db.selectAll = () => {
+db.selectPasswordByUsername = (user)=>{
+    return new Promise ((resolve, reject)=>{
+        pool.query('SELECT password FROM account WHERE account_name = $1',
+        [user],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0].password);
+        })
+    })
+}
+
+db.selectByUsername = (account_name)=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('SELECT * FROM account WHERE account_name = $1',
+        [account_name],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0]);
+        })
+    })
+}
+
+db.hasByUsername = (account_name) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM account", [], (err, result) => {
+        pool.query("SELECT * FROM account WHERE account_name = $1",
+            [account_name],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount>0);
+            })
+    })
+}
+
+db.selectAll = (id_role) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM account WHERE id_role>$1", [id_role], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
         })
@@ -118,11 +151,30 @@ db.updateStatus = (id, status) => {
             [status, id],
             (err, result) => {
                 if (err) return reject(err);
-                console.log(result.rows[0]);
                 return resolve(result.rows[0]);
             })
     })
 }
 
+db.updatePassword = (id, password) => {
+    return new Promise((resolve, reject) => {
+        pool.query("UPDATE account SET password=$1 WHERE id_account=$2",
+            [password, id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
+    })
+}
+
+db.countAdmin = ()=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('SELECT id_account FROM account WHERE id_role = 1',
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rowCount);
+        });
+    })
+}
 
 module.exports = db;
