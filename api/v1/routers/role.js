@@ -1,9 +1,19 @@
 const express = require('express');
 const router = express.Router();
-
+var Auth = require('../../../auth');
 const Role = require('../module/role');
 
-router.get('/', async (req, res, next) => {
+/**
+ * Danh sách chức vụ
+ * @params      i
+ * 
+ * @body        
+ * 
+ * @permisson   Moder trở lên
+ * 
+ * @return      200: thao tác thành công
+ */
+router.get('/', Auth.authenGTModer, async (req, res, next) => {
     try {
         let result = await Role.selectAll();
         res.status(200).json({
@@ -18,7 +28,17 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.get('/:id', async (req, res, next) => {
+/**
+ * Tìm chức vụ
+ * @params      
+ * 
+ * @body        
+ * 
+ * @permisson   Chỉ moder trở lên
+ * 
+ * @return      200: Thao tác thành công
+ */
+router.get('/:id', Auth.authenGTModer, async (req, res, next) => {
     try {
         let id = req.params.id;
 
