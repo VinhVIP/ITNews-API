@@ -51,6 +51,17 @@ VALUES
 (2, 3, 'vinh', 'Quang Vinh', 'vinhvip@gmail.com', 'mypasswordshouldbehide'),
 (3, 3, 'long', 'Hoàng Long', 'long@gmail.com', 'csacdvdfhthdf');
 
+-- Xác thực mã -- 
+
+CREATE TABLE verification(
+	id_verification serial PRIMARY KEY,
+	id_account serial,
+	code text,
+	create_time timestamp without time zone default CURRENT_TIMESTAMP,
+
+	FOREIGN KEY (id_account) REFERENCES account(id_account)
+);
+
 
 
 -- Khóa tài khoản --

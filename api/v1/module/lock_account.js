@@ -13,4 +13,14 @@ db.add = (id_account_lock, id_account_boss, reason, hours_lock)=>{
     })
 }
 
+db.selectAll = ()=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('SELECT * FROM lock_account',
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows);
+        })
+    })
+}
+
 module.exports = db;

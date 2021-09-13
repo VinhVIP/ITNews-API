@@ -1,8 +1,16 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+var nodemailer = require('nodemailer');
 const myPlaintextPassword = 'K9#4d6z_fT"m,Zy';
 const saltRounds = 10;
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'samab1541@gmail.com',
+      pass: '1234567qety'
+    }
+});
 
 const router = express.Router();
 
@@ -15,6 +23,7 @@ const FollowAccount = require('../module/follow_account');
 const Vote = require('../module/vote');
 const LockAccount = require('../module/lock_account');
 const Notification = require('../module/notification');
+const Verification = require('../module/verification');
 
 var Auth = require('../../../auth');
 
@@ -84,7 +93,7 @@ router.get('/all', Auth.authenGTModer, async (req, res, next) => {
             message: 'Tài khoản đang bị khóa'
         })
     }else{
-        var list = await Account.selectAll();
+        var list = await Account.selectAll(acc.id_role);
 
         return res.status(200).json({
             message: 'Account ok',
@@ -92,6 +101,71 @@ router.get('/all', Auth.authenGTModer, async (req, res, next) => {
         });
     }
     
+});
+
+/**
+ * Lấy danh sách tất cả thông đã bị khóa
+ * 
+ * @permission  Chỉ Admin
+ * @return      200: Trả về danh sách
+ *              403: Tài khoản không có quyền
+ */
+ router.get('/account_locked/all', Auth.authenAdmin, async (req, res, next) => {
+    let acc = await Account.selectId(Auth.tokenData(req).id_account);
+    if(acc.status!=0){
+        return res.status(403).json({
+            message: 'Tài khoản đang bị khóa'
+        })
+    }else{
+        var list = await LockAccount.selectAll();
+
+        return res.status(200).json({
+            message: 'Thao tác thực hiện',
+            data: list
+        });
+    }
+    
+});
+
+/**
+ * Đổi password của cá nhân
+ * @params      id: để chơi, không dùng đến (để 1 số bất kỳ thì nó cũng hoạt động dc)
+ * 
+ * @body        
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      201: Đổi thành công
+ *              400: Mật khẩu mới chưa được nhập
+ */
+router.put('/:id/change_password', Auth.authenGTUser, async(req, res, next)=>{
+    try{
+        let new_password = req.body.new_password;
+        let id_account = Auth.tokenData(req).id_account;
+
+        if(new_password.trim()!=""){
+            bcrypt.hash(new_password, saltRounds, async(err, hash) => {
+                new_password = hash;
+                if(err){
+                    console.log(err);
+                    return res.sendStatus(500);
+                }
+                let changePassword = await Account.updatePassword(id_account, new_password);
+
+                res.status(201).json({
+                    message: 'Thay đổi mật khẩu thành công',
+                })
+            });
+        }else{
+            return res.status(400).json({
+                message: 'Thiếu thông tin'
+            });
+        }
+
+    }catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
 });
 
 
@@ -160,81 +234,17 @@ router.get('/:id/role', async (req, res, next) => {
     }
 })
 
-
 /**
- * Thêm 1 tài khoản thường
+ * Tạo tài khoản moderator
+ * @params      
  * 
- * @permisson   Ai cũng có thể thực thi
- * @return      201: Tạo thành công, trả về id vừa được thêm
- *              400: Thiếu thông tin đăng ký
+ * @body        account_name, real_name, email, password 
+ * 
+ * @permisson   Chỉ có admin (id_role == 1)
+ * 
+ * @return      201: Tạo thành công
+ *              400: Thiếu dữ liệu body
  */
-router.post('/', async (req, res, next) => {
-    try {
-        var { account_name, real_name, email, password } = req.body;
-
-        if (account_name && real_name && email && password) {
-            let id_role = 3;
-            bcrypt.hash(password, saltRounds, async(err, hash) => {
-                password = hash;
-                if(err){
-                    console.log(err);
-                    return res.sendStatus(500);
-                }
-                let acc = { account_name, real_name, email, password, id_role };
-                let insertId = await Account.add(acc);
-
-                res.status(201).json({
-                    message: 'Tạo mới tài khoản thành công',
-                    data: {
-                        id: insertId
-                    }
-                })
-            });
-            
-        } else {
-            res.status(400).json({
-                message: 'Thiếu dữ liệu để tạo tài khoản'
-            })
-        }
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({
-            message: 'Something wrong'
-        })
-    }
-
-});
-
-router.patch('/:id/change_password', Auth.authenGTUser, async(req, res, next)=>{
-    try{
-
-        let new_password = req.body.new_passwod;
-        let id_account = Auth.tokenData(req).id_account;
-        if(new_password){
-            bcrypt.hash(new_password, saltRounds, async(err, hash) => {
-                new_password = hash;
-                if(err){
-                    console.log(err);
-                    return res.sendStatus(500);
-                }
-                let changePassword = await Account.updatePassword(id_account, new_password);
-
-                res.status(201).json({
-                    message: 'Thay đổi mật khẩu thành công',
-                })
-            });
-        }else{
-            return res.status(400).json({
-                message: 'Thiếu thông tin'
-            });
-        }
-
-    }catch(err){
-        console.log(err);
-        return res.sendStatus(500);
-    }
-});
-
 router.post('/create/moderator', Auth.authenAdmin, async (req, res, next) => {
     try {
         var { account_name, real_name, email, password } = req.body;
@@ -272,6 +282,17 @@ router.post('/create/moderator', Auth.authenAdmin, async (req, res, next) => {
 
 });
 
+/**
+ * Thêm tài khoản admin
+ * @params      
+ * 
+ * @body        account_name, real_name, email, password
+ * 
+ * @permisson   Chỉ có admin (id_rold == 1)
+ * 
+ * @return      201: Tạo thành công
+ *              400: Thiếu body
+ */
 router.post('/create/admin', Auth.authenAdmin, async (req, res, next) => {
     try {
         var { account_name, real_name, email, password } = req.body;
@@ -309,6 +330,17 @@ router.post('/create/admin', Auth.authenAdmin, async (req, res, next) => {
 
 });
 
+/**
+ * Tạo tài khoản admin khởi đầu (lúc mới tạo web) (chỉ tạo được khi chưa có tài khoản admin nào)
+ * @params      
+ * 
+ * @body        account_name, real_name, email, password
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      201: tạo thành công
+ *              400: Thiếu body
+ */
 router.post('/create/admin_account/init', async (req, res, next) => {
     try {
         var { account_name, real_name, email, password } = req.body;
@@ -451,70 +483,6 @@ router.put('/:id/role/:id_role_new', Auth.authenGTModer, async (req, res, next) 
     }
 })
 
-// Chưa làm lưu vào bảng khóa tài khoản
-/**
- * Thay đổi trạng thái của 1 tài khoản
- *      0: Hoạt động
- *      1: Khóa tạm thời có thời gian (moder trở lên)
- *      2: Khóa vĩnh viễn (chỉ admin)
- * @permission  Moder trở lên mới được phép thực thi
- *              Không thể thay đổi cho chức vụ ngang hàng trở lên
- * @return      200: Thành công, trả về thông tin tài khoản sau khi cập nhật
- *              400: Giá trị trạng thái không hợp lệ
- *              403: Không có quyền thực thi
- */
-router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next) => {
-    try {
-        let { id, status_new } = req.params;
-
-        let id_boss = Auth.tokenData(req).id_account;
-
-        let accBoss = await Account.selectId(id_boss);
-        let accUser = await Account.selectId(id);
-
-        if (accBoss.id_role == 2) {
-            // MODER
-            if (accBoss.id_role >= accUser.id_role || status_new == 2 || accUser.status == 2) {
-                res.status(403).json({
-                    message: 'Bạn không có quyền thực hiện hành động này'
-                })
-            } else {
-                if (status_new < 0 || status_new >= 3) {
-                    res.status(400).json({
-                        message: 'Giá trị trạng thái không hợp lệ'
-                    })
-                } else {
-                    let result = await Account.updateStatus(id, status_new);
-                    res.status(200).json({
-                        message: 'Thay đổi trạng thái của tài khoản thành công',
-                        data: result
-                    })
-                }
-            }
-        } else if (accBoss.id_role == 1) {
-            // ADMIN
-            if (status_new < 0 || status_new >= 3) {
-                res.status(400).json({
-                    message: 'Giá trị trạng thái không hợp lệ'
-                })
-            } else {
-                let result = await Account.updateStatus(id, status_new);
-                res.status(200).json({
-                    message: 'Thay đổi trạng thái của tài khoản thành công',
-                    data: result
-                })
-            }
-
-        }
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: 'Something wrong'
-        })
-    }
-})
-
 /**
  * Lấy tất cả bài viết (public, đã kiểm duyệt) của một tài khoản
  * 
@@ -543,6 +511,21 @@ router.get('/:id/posts', async (req, res, next) => {
     }
 })
 
+/**
+ * Khóa tài khoản tạm thời
+ * @params      id: id người bị khóa 
+ * 
+ * @body        reasom, hours_lock
+ * 
+ * @permisson   từ moder trở lên
+ * 
+ * @return      200: Thao tác thực hiện
+ *              202: tài khoản cần kháo đang bị khóa
+ *              400: Mật khẩu mới chưa được nhập
+ *              401: thời gian tối đa là 576, tối thiểu là 1
+ *              403: Tài khoản không có quyền
+ *              404: Không thấy tài khoản cần khóa
+ */
 router.post('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
     try{
         let id_account_lock = req.params.id;
@@ -560,7 +543,6 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
         let acc_lock = await Account.selectId(id_account_lock);
 
         if(acc_boss.status!=0 || acc_boss.id_role >= acc_lock.id_role){
-        // if(acc_boss.status!=0 || 1 == 1){
             return res.status(403).json({
                 message: 'Tài khoản không có quyền thực hiện',
             });
@@ -581,7 +563,6 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
         if(reason && hours_lock && isNumber(hours_lock)){
             let ban = LockAccount.add(id_account_lock, id_account_boss, reason, hours_lock);
             let notify = Notification.addNotification(id_account_lock, `Tài khoản của bạn đã bị khóa ${hours_lock} giờ`, `/account/${id_account_lock}`)
-            // setTimeout(unLockAccount(id_account_lock), Number(hours_lock)*3600000);
             let lock = Account.updateStatus(id_account_lock, 1);
             setTimeUnlock(id_account_lock, Number(hours_lock)*3600000);
             res.status(200).json({
@@ -600,10 +581,22 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
     }
 });
 
+/**
+ * Mở khóa tài khoản
+ * @params      id (id_locker)
+ * 
+ * @body        
+ * 
+ * @permisson   Moder trở lên
+ * 
+ * @return      200: Mở thành công
+ *              403: Tài khoản không có quyền
+ *              404: Không thấy tài khoản cần mở
+ */
 router.patch('/:id/unlock', Auth.authenGTModer, async(req, res, next)=>{
     let id_account_lock = req.params.id;
     let id_account_boss = Auth.tokenData(req).id_account;
-    let exist = Account.has(id_account_lock);
+    let exist = await Account.has(id_account_lock);
 
     if(!exist){
         return res.status(404).json({
@@ -611,8 +604,8 @@ router.patch('/:id/unlock', Auth.authenGTModer, async(req, res, next)=>{
         });
     }
 
-    let acc_boss = Account.selectId(id_account_boss);
-    let acc_lock = Account.selectId(id_account_lock);
+    let acc_boss = await Account.selectId(id_account_boss);
+    let acc_lock = await Account.selectId(id_account_lock);
 
     if(acc_boss.status!=0 || acc_boss.id_role >= acc_lock.id_role || acc_lock.status == 2){
         return res.status(403).json({
@@ -627,7 +620,19 @@ router.patch('/:id/unlock', Auth.authenGTModer, async(req, res, next)=>{
     }
 });
 
-router.post('/:id/die', Auth.authenAdmin, async (req, res, next)=>{
+/**
+ * Khóa vĩnh viễn
+ * @params      id: id người bị khóa
+ * 
+ * @body        reason
+ * 
+ * @permisson   Chỉ có admin
+ * 
+ * @return      200: Thao tác thành công
+ *              400: Thiếu body
+ *              404: không thấy người cần khóa
+ */
+router.patch('/:id/die', Auth.authenAdmin, async (req, res, next)=>{
     try{
         let id_account_lock = req.params.id;
         let reason = req.body.reason;
@@ -640,8 +645,9 @@ router.post('/:id/die', Auth.authenAdmin, async (req, res, next)=>{
         let acc_lock = Account.selectId(id_account_lock);
 
         if(reason){
-            let ban = LockAccount.add(id_account_lock, Auth.tokenData(req).id_account, reason, 0);
-            let notify = Notification.addNotification(id_account_lock, `Tài khoản của bạn đã bị khóa vô thời hạn`);
+            let save = LockAccount.add(id_account_lock, Auth.tokenData(req).id_account, reason, 0);
+            let notify = Notification.addNotification(id_account_lock, `Tài khoản của bạn đã bị khóa vô thời hạn`, `/account/${id_account_lock}`);
+            let kill = Account.updateStatus(id_account_lock, 2);
             res.status(200).json({
                 message: 'Khóa vĩnh viễn tài khoản thành công'
             });
@@ -657,6 +663,17 @@ router.post('/:id/die', Auth.authenAdmin, async (req, res, next)=>{
     }
 });
 
+/**
+ * Mở khóa
+ * @params      id: id người cần mở khóa
+ * 
+ * @body        
+ * 
+ * @permisson   Chỉ có admin
+ * 
+ * @return      201: Đổi thành công
+ *              404: Không tìm thấy tài khoản cần mở khóa
+ */
 router.patch('/:id/revive', Auth.authenAdmin, async(req, res, next)=>{
     let id_account_lock = req.params.id;
     let exist = Account.has(id_account_lock);
@@ -765,6 +782,110 @@ router.get('/:id/following', async (req, res, next) => {
     }
 })
 
+/**
+ * Quên mật khẩu
+ * @params      
+ * 
+ * @body        account_name
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      200: Gửi mail thành công, trả về dữ liệu của tài khoản (để qua /:id/confirm)
+ *              400: Thiếu body
+ *              404: Không tìm thấy username
+ */
+router.post('/forgot/password', async(req, res, next)=>{
+    try{
+        let username = req.body.account_name;
+        if(!username){
+            return res.status(400).json({
+                message:'Thiếu dữ liệu gửi về'
+            });
+        }
+
+        let exist = await Account.hasByUsername(username);
+
+        if(!exist){
+            return res.status(404).json({
+                message: 'Không tồn tại tài khoản này'
+            });
+        }else{
+            let acc = await Account.selectByUsername(username);
+            let code = await createCode();
+            
+            bcrypt.hash(code, saltRounds, async(err, hash) => {
+                let send = sendEmail(acc.email, code);
+                code = hash;
+                if(err){
+                    console.log(err);
+                    return res.sendStatus(500);
+                }
+                let id_verify = await Verification.add(acc.id_account, code);
+                let del = autoDeleteCode(id_verify);
+            });
+            
+            res.status(200).json({
+                message: 'Đã gửi mã xác nhận',
+                data: acc
+            });
+        }
+    }catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
+
+/**
+ * Xác nhận mã (mã có hiệu lực trong 60s)
+ * @params      id tài khoản cần lấy lại
+ * 
+ * @body        code
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      200: Đổi thành công, trả về jwt để thêm vào header (xog thì chuyển qua đổi mật khẩu)
+ *              400: Mã không đúng
+ *              404: Mã hết hạn
+ */
+router.post('/:id/confirm', async(req, res, next)=>{
+    try{
+        let code = req.body.code;
+        let id_account = req.params.id;
+
+        let exist = await Verification.has(id_account);
+        if(!exist){
+            return res.status(404).json({
+                message: 'Mã đã hết hạn'
+            })
+        }
+
+        let verify = await Verification.selectCode(id_account);
+        let match = await bcrypt.compare(code, verify);
+        if(match){
+            let acc = await Account.selectId(id_account);
+            var data = {
+                "id_account": acc.id_account,
+                "id_role": acc.id_role,
+                "account_name": acc.account_name,
+                "status": acc.status,
+            }
+                    
+            const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '3600s'});
+
+            return res.status(200).json({
+                message: 'đăng nhập thành công',
+                accessToken
+            });
+        }else{
+            return res.status(400).json({
+                message: 'Mật mã không đúng'
+            });
+        }
+    }catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
 
 /**
  * Lấy danh sách tài khoản mà TK có id cho trước theo dõi
@@ -859,7 +980,49 @@ router.get('/:id/view', async (req, res, next) => {
         console.log(error);
         res.sendStatus(500);
     }
-})
+});
+
+/**
+ * Thêm 1 tài khoản thường
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      201: Tạo thành công, trả về id vừa được thêm
+ *              400: Thiếu thông tin đăng ký
+ */
+ router.post('/', async (req, res, next) => {
+    try {
+        var { account_name, real_name, email, password } = req.body;
+
+        if (account_name && real_name && email && password) {
+            let id_role = 3;
+            bcrypt.hash(password, saltRounds, async(err, hash) => {
+                password = hash;
+                if(err){
+                    console.log(err);
+                    return res.sendStatus(500);
+                }
+                let acc = { account_name, real_name, email, password, id_role };
+                let insertId = await Account.add(acc);
+
+                res.status(201).json({
+                    message: 'Tạo mới tài khoản thành công',
+                    data: insertId
+                });
+            });
+            
+        } else {
+            res.status(400).json({
+                message: 'Thiếu dữ liệu để tạo tài khoản'
+            })
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            message: 'Something wrong'
+        })
+    }
+
+});
 
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); } 
 
@@ -873,6 +1036,32 @@ async function unLockAccount(id_account){
 }
 
 function setTimeUnlock(id_account_lock, time){
-    setTimeout(unLockAccount, 20000, id_account_lock);
+    setTimeout(unLockAccount, time, id_account_lock);
+}
+
+function deleteCode(id_verification){
+    let del = Verification.delete(id_verification);
+}
+
+function autoDeleteCode(id_verification){
+    setTimeout(deleteCode, 60000, id_verification);
+}
+
+async function createCode() {
+    var result = '';
+    for ( var i = 0; i < 6; i++ ) {
+        result += String(Math.floor(Math.random() * 10));
+    }
+    return result;
+}
+
+function sendEmail(userEmail, verification){
+    var mailOptions = {
+        from: 'samab1541@gmail.com',
+        to: userEmail,
+        subject: 'Lấy lại mật khẩu',
+        text: 'Mã xác nhận của bạn là: ' + verification,
+    };
+    transporter.sendMail(mailOptions);
 }
 module.exports = router;

@@ -55,11 +55,22 @@ db.hasByUsername = (account_name) => {
 
 db.selectAll = (id_role) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM account WHERE id_role>$1", [id_role], (err, result) => {
+        pool.query("SELECT * FROM account WHERE id_role>=$1", [id_role], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
         })
     });
+}
+
+db.updateVerification = (id, verification)=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('UPDATE account SET verification = $1 WHERE id_account = $2',
+        [verification, id],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rowCount);
+        })
+    })
 }
 
 db.has = (id) => {
