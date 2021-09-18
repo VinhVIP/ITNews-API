@@ -27,6 +27,17 @@ db.selectTagsOfPost = (id) => {
     })
 }
 
+db.isPublic = (id_post)=>{
+    return new Promise((resolve ,reject)=>{
+        pool.query('SELECT id_post FROM post WHERE id_post=$1 and access=1',
+        [id_post],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rowCount>0);
+        })
+    })
+}
+
 db.selectAccountPostId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query("SELECT id_account FROM post WHERE id_post=$1",

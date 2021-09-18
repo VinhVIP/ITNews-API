@@ -20,13 +20,57 @@ db.checkAccount = (account) => {
     })
 }
 
-db.selectAll = () => {
+db.selectPasswordByUsername = (user)=>{
+    return new Promise ((resolve, reject)=>{
+        pool.query('SELECT password FROM account WHERE account_name = $1',
+        [user],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0].password);
+        })
+    })
+}
+
+db.selectByUsername = (account_name)=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('SELECT * FROM account WHERE account_name = $1',
+        [account_name],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0]);
+        })
+    })
+}
+
+db.hasByUsername = (account_name) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM account", [], (err, result) => {
+        pool.query("SELECT * FROM account WHERE account_name = $1",
+            [account_name],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount>0);
+            })
+    })
+}
+
+db.selectAll = (id_role) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM account WHERE id_role>=$1", [id_role], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
         })
     });
+}
+
+db.updateVerification = (id, verification)=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('UPDATE account SET verification = $1 WHERE id_account = $2',
+        [verification, id],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rowCount);
+        })
+    })
 }
 
 db.has = (id) => {
@@ -65,6 +109,17 @@ db.selectRole = (id) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0]);
             })
+    })
+}
+
+db.selectName = (id_account)=>{
+    return new Promise((resolve ,reject)=>{
+        pool.query('SELECT real_name FROM account WHERE id_account = $1',
+        [id_account],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows[0].real_name);
+        })
     })
 }
 
@@ -107,11 +162,30 @@ db.updateStatus = (id, status) => {
             [status, id],
             (err, result) => {
                 if (err) return reject(err);
-                console.log(result.rows[0]);
                 return resolve(result.rows[0]);
             })
     })
 }
 
+db.updatePassword = (id, password) => {
+    return new Promise((resolve, reject) => {
+        pool.query("UPDATE account SET password=$1 WHERE id_account=$2",
+            [password, id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
+    })
+}
+
+db.countAdmin = ()=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('SELECT id_account FROM account WHERE id_role = 1',
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rowCount);
+        });
+    })
+}
 
 module.exports = db;
