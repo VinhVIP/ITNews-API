@@ -1,7 +1,10 @@
 {
-  "name": "book-api-postgresql",
+  "name": "it-news",
   "version": "1.0.0",
-  "description": "",
+  "description": "API",
+  "engines": {
+    "node": "14.17.5"
+  },
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
