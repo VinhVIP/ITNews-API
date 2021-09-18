@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 var nodemailer = require('nodemailer');
 const myPlaintextPassword = 'K9#4d6z_fT"m,Zy';
 const saltRounds = 10;
