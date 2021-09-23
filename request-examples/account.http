@@ -3,7 +3,7 @@ POST http://localhost:8000/api/v1/account/login
 Content-Type: application/json
 
 {
-    "account_name": "admin",
+    "account_name": "admin3",
     "password": "123456"
 }
 
@@ -16,7 +16,7 @@ POST http://localhost:8000/api/v1/account
 Content-Type: application/json
 
 {
-    "account_name":"admin2",
+    "account_name":"admin3",
     "real_name": "Beerus Sama",
     "email": "beerus@gmail.com",
     "password":"123456"
