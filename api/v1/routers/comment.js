@@ -190,7 +190,7 @@ router.get('/:id_post/comment/all', Auth.authenGTUser, async(req, res, next)=>{
 });
 
 /**
- * Thêm 1 tài khoản mới (đăng ký)
+ * Trả lời của 1 comment chính
  * @body        content
  * @permisson   Người có tài khoản
  *              Người không bị khóa mõm
@@ -258,7 +258,7 @@ router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(r
  *              401: Không có quyền sửa bình luận của người khác
  *              404: Không tìm thấy bài đăng hoặc bình luận
  */
-router.put('/:id_post/comment/:id_cmt/update/', Auth.authenGTUser, async(req, res, next)=>{
+router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async(req, res, next)=>{
     try{
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let idPost = req.params.id_post;
@@ -319,7 +319,7 @@ router.put('/:id_post/comment/:id_cmt/update/', Auth.authenGTUser, async(req, re
  *              403: Tài khoản này bị khóa
  *              404: Không tìm thấy post hoặc bình luận
  */
-router.delete('/:id_post/comment/:id_cmt/delete/', Auth.authenGTUser, async(req, res, next)=>{
+router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async(req, res, next)=>{
     try{
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let idCmt = req.params.id_cmt;

@@ -45,7 +45,7 @@ router.get('/:id_image', async(req, res, next) => {
             })
         }else{
             let path = await Image.selectUrl(id_image);
-            image = fs.readFile(path, (err, data)=>{
+            let image = fs.readFile(path, (err, data)=>{
                 if(err){
                     res.status(400).json({
                         message: 'không thể đọc file'
@@ -87,7 +87,6 @@ router.delete('/:id_image', Auth.authenGTUser, async(req, res, next)=>{
         let path = await Image.selectUrl(id_image);
 
         if(acc.status !=0){
-            fs.unlinkSync(path);
             return res.status(403).json({
                 message: 'Tài khoản này đang bị khóa'
             })

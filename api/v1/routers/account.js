@@ -1,16 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-var nodemailer = require('nodemailer');
-const myPlaintextPassword = 'K9#4d6z_fT"m,Zy';
 const saltRounds = 10;
-var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'samab1541@gmail.com',
-      pass: '1234567qety'
-    }
-});
+const mailer = require('../../../mail');
 
 const router = express.Router();
 
@@ -39,8 +31,6 @@ router.post('/login', async(req, res, next)=>{
         if(!(username && password)){
             return res.status(404).json({
                 message: 'Thiếu thông tin đăng nhập',
-                use: username,
-                pass: password
             })
         }
 
@@ -80,6 +70,25 @@ router.post('/login', async(req, res, next)=>{
     }
 })
 
+/**
+ * Lấy thông tin tài khoản
+ * 
+ * @permission Đã đăng nhập
+ * @returns     200: trả về data
+ */
+router.get('/information', Auth.authenGTUser, async (req, res, next)=>{
+    try{
+        let acc = await Account.selectId(Auth.tokenData(req).id_account);
+
+        return res.status(200).json({
+            message: "Lấy dữ liệu thành công",
+            data: acc
+        })
+    }catch(err){
+        console.log(err);
+        res.sendStatus(500);
+    }
+})
 
 /**
  * Lấy danh sách tất cả tài khoản
@@ -526,7 +535,7 @@ router.get('/:id/posts', async (req, res, next) => {
  *              403: Tài khoản không có quyền
  *              404: Không thấy tài khoản cần khóa
  */
-router.post('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
+router.patch('/:id/ban', Auth.authenGTModer, async (req, res, next)=>{
     try{
         let id_account_lock = req.params.id;
         let id_account_boss = Auth.tokenData(req).id_account;
@@ -814,7 +823,7 @@ router.post('/forgot/password', async(req, res, next)=>{
             let code = await createCode();
             
             bcrypt.hash(code, saltRounds, async(err, hash) => {
-                let send = sendEmail(acc.email, code);
+                let send = mailer.sendVerification(acc.email, code);
                 code = hash;
                 if(err){
                     console.log(err);
@@ -871,10 +880,11 @@ router.post('/:id/confirm', async(req, res, next)=>{
             }
                     
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '3600s'});
-
+            
             return res.status(200).json({
                 message: 'đăng nhập thành công',
-                accessToken
+                accessToken: accessToken,
+                data: data
             });
         }else{
             return res.status(400).json({
@@ -1055,13 +1065,5 @@ async function createCode() {
     return result;
 }
 
-function sendEmail(userEmail, verification){
-    var mailOptions = {
-        from: 'samab1541@gmail.com',
-        to: userEmail,
-        subject: 'Lấy lại mật khẩu',
-        text: 'Mã xác nhận của bạn là: ' + verification,
-    };
-    transporter.sendMail(mailOptions);
-}
+
 module.exports = router;
