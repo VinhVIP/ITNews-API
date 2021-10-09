@@ -247,14 +247,13 @@ router.put('/update/logo', Auth.authenAdmin, upload.single('image'), async(req, 
  router.put('/update/all', Auth.authenAdmin, async(req, res, next)=>{
     try{
         let code_minutes = req.body.code_minutes;
-        let logo = req.body.logo;
         let name = req.body.name;
         let facebook = req.body.facebook;
         let android = req.body.android;
         let ios = req.body.ios;
         let token_days = req.body.token_days;
-        if(code_minutes && logo && name && facebook && android && ios && token_days){
-            let update = await Information.updateAll(logo, name, facebook, android, ios, token_days, code_minutes);
+        if(code_minutes && name && facebook && android && ios && token_days){
+            let update = await Information.updateAll(name, facebook, android, ios, token_days, code_minutes);
             return res.status(200).json({
                 message: "cập nhật tất cả thành công"
             })
