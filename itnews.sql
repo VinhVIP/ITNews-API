@@ -2,6 +2,9 @@
 -- CREATE DATABASE itnews
 -- 	WITH ENCODING='UTF-8';
 
+-- Khởi tạo múi giờ --
+SET timezone = 'Asia/Ho_Chi_Minh';
+
 -- Tạo bảng Chức vụ --
 
 CREATE TABLE role (
@@ -58,10 +61,14 @@ CREATE TABLE verification(
 	id_account serial,
 	code text,
 	create_time timestamp without time zone default CURRENT_TIMESTAMP,
+	end_time timestamp without time zone default CURRENT_TIMESTAMP,
+
 
 	FOREIGN KEY (id_account) REFERENCES account(id_account)
 );
-
+	-- nếu có database r
+	alter table verification add end_time timestamp without time zone default CURRENT_TIMESTAMP
+ 
 
 
 -- Khóa tài khoản --
@@ -74,10 +81,13 @@ CREATE TABLE lock_account(
 	reason text,
 	time_start_lock timestamp without time zone default CURRENT_TIMESTAMP,
 	hours_lock smallint,
+	time_end_lock timestamp without time zone default CURRENT_TIMESTAMP,
 
 	FOREIGN KEY (id_account_lock) REFERENCES account(id_account),
 	FOREIGN KEY (id_account_boss) REFERENCES account(id_account)
 );
+	-- nếu có database r
+	alter table lock_account add time_end_lock timestamp without time zone default CURRENT_TIMESTAMP
 
 
 -- Tạo bảng thẻ: TAGS --
@@ -280,4 +290,44 @@ CREATE TABLE image(
 	url text NOT NULL,
 
 	FOREIGN KEY(id_account) REFERENCES account(id_account)
+);
+
+-- Thông tin, tùy biến trang web --
+
+CREATE TABLE information(
+	id_information serial PRIMARY KEY,
+	logo text,
+	name text,
+	facebook text,
+	android text,
+	ios text,
+	avatar text,
+	logo_tag text,
+	token_valid int,
+	-- token_valid (days): so ngay ton tai token
+	code_confirm int
+	-- code (minutes): so phut ton tai cua code xac nhan
+);
+
+INSERT INTO information(
+	logo, name, facebook, android, ios, avatar,
+	token_valid, code_confirm)
+	VALUES('uploads\\logo.jpg', 'ITNEWS', 
+	'https://www.facebook.com/', 
+	'https://play.google.com/store', 
+	'https://www.apple.com/',
+	'uploads\\avatar.jpg', 24, 3);
+
+-- Phản hồi từ người dùng cho Admin -- 
+CREATE TABLE feedback (
+	id_feedback serial PRIMARY KEY,
+	id_account serial NOT NULL,
+	subject text,
+	content text,
+	date_time timestamp without time zone default CURRENT_TIMESTAMP NOT NULL,
+	status smallint default 0,
+	-- status
+		-- 0: chua doc
+		-- 1: doc roi
+	FOREIGN KEY (id_account) REFERENCES account(id_account)
 );
