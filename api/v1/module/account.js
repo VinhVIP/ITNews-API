@@ -2,6 +2,24 @@ const pool = require('../../../database');
 
 const db = {};
 
+db.checkAccount = (account) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM account WHERE account_name=$1 AND password=$2",
+            [account.account_name, account.password],
+            (err, result) => {
+                if (err) return reject(err);
+                if (result.rows.length > 0) {
+                    return resolve({
+                        status: true,
+                        data: result.rows[0]
+                    })
+                } else {
+                    return resolve({ status: false })
+                }
+            })
+    })
+}
+
 db.selectPasswordByUsername = (user)=>{
     return new Promise ((resolve, reject)=>{
         pool.query('SELECT password FROM account WHERE account_name = $1',
@@ -37,25 +55,9 @@ db.hasByUsername = (account_name) => {
 
 db.selectAll = (id_role) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT a.id_account, a.id_role, r.name AS role,
-            a.account_name, a.real_name, a.email
-            FROM account a, role r
-            WHERE a.id_role = r.id_role id_role>=$1`, 
-        [id_role], 
-        (err, result) => {
+        pool.query("SELECT * FROM account WHERE id_role>=$1", [id_role], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
-        })
-    });
-}
-
-db.selectAvatar = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`SELECT avatar FROM account WHERE id_account = $1`, 
-        [id_account], 
-        (err, result) => {
-            if (err) return reject(err);
-            return resolve(result.rows[0].avatar);
         })
     });
 }
@@ -84,19 +86,15 @@ db.has = (id) => {
 
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT A.id_account, A.id_role, 
-            R.name role_name, A.real_name, A.email, 
-            A.avatar, A.company, A.phone, A.status,
-            TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
-            TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date
-            FROM account A
-            INNER JOIN role R ON A.id_role=R.id_role
-            WHERE A.id_account=$1`,
-        [id],
-        (err, result) => {
-            if (err) return reject(err);
-            return resolve(result.rows[0]);
-        })
+        pool.query(`SELECT A.id_account, A.id_role, R.name role_name, A.real_name, A.email, A.avatar, A.birth, A.company, A.phone, A.create_date, A.status
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$1`,
+            [id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
     })
 }
 
@@ -127,8 +125,8 @@ db.selectName = (id_account)=>{
 
 db.add = (account) => {
     return new Promise((resolve, reject) => {
-        pool.query("INSERT INTO account (account_name, real_name, email, password, id_role, avatar) VALUES ($1,$2,$3,$4,$5, $6) RETURNING id_account",
-            [account.account_name, account.real_name, account.email, account.password, account.id_role, account.avatar],
+        pool.query("INSERT INTO account (account_name, real_name, email, password, id_role) VALUES ($1,$2,$3,$4,$5) RETURNING id_account",
+            [account.account_name, account.real_name, account.email, account.password, account.id_role],
             (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0].id_account);
@@ -144,28 +142,6 @@ db.update = (id, account) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0]);
             });
-    })
-}
-
-db.updateAvatar = (id, avatar) => {
-    return new Promise((resolve, reject) => {
-        pool.query("UPDATE account SET avatar=$1 WHERE id_account=$2 ",
-            [avatar, id],
-            (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows[0]);
-            })
-    })
-}
-
-db.updateAvatarDefault = (old_image, new_image) => {
-    return new Promise((resolve, reject) => {
-        pool.query("UPDATE account SET avatar=$1 WHERE avatar=$2 ",
-            [new_image, old_image],
-            (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows[0]);
-            })
     })
 }
 

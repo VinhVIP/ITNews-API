@@ -499,15 +499,8 @@ router.put('/:id/access/:access_new', Auth.authenGTUser, async (req, res, next) 
 router.get('/newest/:page', async (req, res, next) => {
     try {
         let page = req.params.page;
-        let search = req.body.search;
-        let postsId;
+        let postsId = await Post.getNewestPage(page);
 
-        if(search){
-            postsId = await Post.getSearch(page, search);
-        }else{
-            postsId = await Post.getNewestPage(page);
-        }
-        
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {

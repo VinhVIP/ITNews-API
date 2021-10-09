@@ -70,14 +70,7 @@ db.deleteParent = (id_comment)=>{
 
 db.listCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, 
-        a.avatar, c.id_cmt, c.content, c.id_cmt_parent,
-        TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
-        TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
-        from comment c, account a 
-        WHERE c.id_account = a.id_account and 
-        id_post = $1 
-        ORDER BY id_cmt_parent, date_time`,
+        pool.query("select a.id_account, a.real_name, a.avatar, c.id_cmt, c.content, c.date_time, c.id_cmt_parent from comment c, account a WHERE c.id_account = a.id_account and id_post = $1 ORDER BY id_cmt_parent, date_time",
         [id_post],
         (err, result)=>{
             if (err) return reject (err);
@@ -88,15 +81,7 @@ db.listCommentInPost = (id_post) =>{
 
 db.listMainCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, 
-            c.id_cmt, c.content, c.id_cmt_parent,
-            TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
-            TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
-            from comment c, account a 
-            WHERE c.id_account = a.id_account and 
-            c.id_cmt = c.id_cmt_parent and 
-            id_post = $1 
-            ORDER BY id_cmt_parent, date_time`,
+        pool.query("select a.id_account, a.real_name, a.avatar, c.id_cmt, c.content, c.date_time, c.id_cmt_parent from comment c, account a WHERE c.id_account = a.id_account and c.id_cmt = c.id_cmt_parent and id_post = $1 ORDER BY id_cmt_parent, date_time",
         [id_post],
         (err, result)=>{
             if (err) return reject (err);
@@ -107,14 +92,7 @@ db.listMainCommentInPost = (id_post) =>{
 
 db.listReplyInComment = (id_cmt) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, 
-            c.id_cmt, c.content, c.id_cmt_parent,
-            TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
-            TO_CHAR(c.date_time:: time, 'hh24:mi') AS time 
-            from comment c, account a 
-            WHERE c.id_account = a.id_account and 
-            c.id_cmt_parent = $1 
-            ORDER BY id_cmt_parent, date_time`,
+        pool.query("select a.id_account, a.real_name, a.avatar, c.id_cmt, c.content, c.date_time, c.id_cmt_parent from comment c, account a WHERE c.id_account = a.id_account and c.id_cmt_parent = $1 ORDER BY id_cmt_parent, date_time",
         [id_cmt],
         (err, result)=>{
             if (err) return reject (err);
@@ -125,13 +103,7 @@ db.listReplyInComment = (id_cmt) =>{
 
 db.listAllCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, 
-            c.id_cmt, c.content, c.id_cmt_parent, c.status,
-            TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
-            TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
-            from comment c, account a 
-            where c.id_account = a.id_account and id_post = $1 
-            order by id_cmt_parent, date_time`,
+        pool.query("select a.id_account, a.real_name, a.avatar, c.id_cmt, c.content, c.date_time, c.id_cmt_parent, c.status from comment c, account a where c.id_account = a.id_account and id_post = $1 order by id_cmt_parent, date_time",
         [id_post],
         (err, result)=>{
             if (err) return reject (err);
@@ -164,11 +136,7 @@ db.selectAccountComment = (id_cmt)=>{
 
 db.selectId = (id_cmt)=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT *,
-        TO_CHAR(date_time:: date, 'dd/mm/yyyy') AS day,
-        TO_CHAR(date_time:: time, 'hh24:mi') AS time
-        FROM comment 
-        where id_cmt = $1`,
+        pool.query("SELECT * FROM comment where id_cmt = $1",
         [id_cmt],
         (err, result)=>{
             if(err) return reject(err);

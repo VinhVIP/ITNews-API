@@ -4,13 +4,7 @@ const db = {};
 
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT *,
-            TO_CHAR(created :: time, 'hh24:mi') as time_created,
-            TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
-            TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
-            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified
-            FROM post 
-            WHERE id_post=$1`,
+        pool.query("SELECT * FROM post WHERE id_post=$1",
             [id],
             (err, result) => {
                 if (err) return reject(err);
@@ -185,27 +179,6 @@ db.getNewestPage = (page) => {
                 if (err) return reject(err);
                 return resolve(postResult.rows)
             });
-
-    })
-}
-
-db.getSearch = (page, search) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`WITH searched AS (
-                SELECT id_post, view, 
-                POSITION(LOWER($2) IN LOWER(title)) AS title, 
-                POSITION(LOWER($2) IN LOWER(content)) AS content 
-                FROM post
-                WHERE status=1 AND access=1)
-            SELECT * FROM searched 
-            WHERE title >0 OR content >0 
-            ORDER BY view DESC
-            LIMIT 10 OFFSET $1`,
-        [(page - 1) * 10, search],
-        (err, postResult) => {
-            if (err) return reject(err);
-            return resolve(postResult.rows)
-        });
 
     })
 }

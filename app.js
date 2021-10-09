@@ -78,11 +78,5 @@ app.use(`${apiUrl}/image`, require('./api/v1/routers/image'));
 // notification
 app.use(`${apiUrl}/notification`, require('./api/v1/routers/notification'));
 
-// information
-app.use(`${apiUrl}/information`, require('./api/v1/routers/information'));
-
-//feedback
-app.use(`${apiUrl}/feedback`, require('./api/v1/routers/feedback'));
-
 
 module.exports = app;
