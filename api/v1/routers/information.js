@@ -70,32 +70,6 @@ router.put('/update/logo', Auth.authenAdmin, upload.single('image'), async(req, 
 })
 
 /**
- * Cập nhật logo
- * @body   image
- */
- router.put('/update/logo', Auth.authenAdmin, upload.single('image'), async(req, res, next)=>{
-    try{
-        let file = req.file;
-
-        if(!file){
-            return res.status(400).json({
-                message: 'Tải file không thành công'
-            });
-        }else{
-            let old_image = await Information.selectLogo();
-            fs.unlinkSync(old_image);
-            let update = await Information.updateLogo(file.path);
-            return res.status(200).json({
-                message: "cập nhật logo thành công"
-            })
-        }
-    }catch(err){
-        console.log(err);
-        return res.sendStatus(500);
-    }
-})
-
-/**
  * Cập nhật avatar mặc định
  * @body   image
  */
@@ -246,7 +220,7 @@ router.put('/update/logo', Auth.authenAdmin, upload.single('image'), async(req, 
  * Cập nhật thời hạn mã xác nhận
  * @body   code_minutes
  */
- router.put('/update/token', Auth.authenAdmin, async(req, res, next)=>{
+ router.put('/update/code', Auth.authenAdmin, async(req, res, next)=>{
     try{
         let code_minutes = req.body.code_minutes;
         if(!code_minutes){
