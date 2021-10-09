@@ -5,7 +5,8 @@ const saltRounds = 10;
 const mailer = require('../../../mail');
 
 const router = express.Router();
-
+const fs = require('fs');
+const multer = require('multer');
 const Account = require('../module/account');
 const Role = require('../module/role');
 const Post = require('../module/post');
@@ -16,55 +17,78 @@ const Vote = require('../module/vote');
 const LockAccount = require('../module/lock_account');
 const Notification = require('../module/notification');
 const Verification = require('../module/verification');
+const Mailer = require('../../../mail');
+const Information = require('../module/information');
 
 var Auth = require('../../../auth');
+const e = require('express');
+const storage = multer.diskStorage({
+    destination: './uploads',
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+var upload = multer({
+    storage: storage,
+});
 
 /**
  * Đăng nhập
  * @body   account_name, password
  */
-router.post('/login', async(req, res, next)=>{
-    try{
+router.post('/login', async (req, res, next) => {
+    try {
         let username = req.body.account_name;
         let password = req.body.password;
 
-        if(!(username && password)){
+        if (!(username && password)) {
             return res.status(404).json({
                 message: 'Thiếu thông tin đăng nhập',
+                use: username,
+                pass: password
             })
         }
 
         let exist = await Account.hasByUsername(username);
 
-        if(exist){
+        if (exist) {
             let acc = await Account.selectByUsername(username);
             let match = await bcrypt.compare(password, acc.password);
 
-            if(match){
+            if(acc.status==1){
+                let valid = await LockAccount.check(acc.id_account);
+                if(valid){
+                    Account.updateStatus(acc.id_account, 0);
+                }
+            }
+
+            if (match) {
                 var data = {
                     "id_account": acc.id_account,
                     "id_role": acc.id_role,
                     "account_name": acc.account_name,
                     "status": acc.status,
                 }
-                        
-                const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '3600s'});
+                let days_token = await Information.selectToken();
+                const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
 
                 return res.status(200).json({
                     message: 'đăng nhập thành công',
-                    accessToken
+                    accessToken: accessToken,
+                    data: data
                 });
-            }else{
+            } else {
                 return res.status(400).json({
                     message: 'Mật khẩu hoặc tài khoản không đúng'
                 });
             }
-        }else{
+        } else {
             return res.status(400).json({
                 message: 'Mật khẩu hoặc tài khoản không đúng',
             });
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
