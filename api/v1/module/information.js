@@ -101,13 +101,13 @@ db.updateCode = (code_minutes)=>{
     })
 }
 
-db.updateAll = (logo, name, facebook, android, ios, token, code)=>{
+db.updateAll = (name, facebook, android, ios, token, code)=>{
     return new Promise((resolve, reject)=>{
         pool.query(`UPDATE information SET
-            logo = $1, name = $2, facebook = $3,
-            android = $4, ios = $5, token_valid = $6,
-            code_confirm = $7`,
-        [logo, name, facebook, android, ios, token, code],
+            name = $1, facebook = $2,
+            android = $3, ios = $4, token_valid = $5,
+            code_confirm = $6`,
+        [name, facebook, android, ios, token, code],
         (err, result)=>{
             if(err) return reject(err);
             return resolve(result.rows);
