@@ -45,7 +45,7 @@ router.get('/:id_image', async(req, res, next) => {
             })
         }else{
             let path = await Image.selectUrl(id_image);
-            image = fs.readFile(path, (err, data)=>{
+            let image = fs.readFile(path, (err, data)=>{
                 if(err){
                     res.status(400).json({
                         message: 'không thể đọc file'
@@ -87,7 +87,6 @@ router.delete('/:id_image', Auth.authenGTUser, async(req, res, next)=>{
         let path = await Image.selectUrl(id_image);
 
         if(acc.status !=0){
-            fs.unlinkSync(path);
             return res.status(403).json({
                 message: 'Tài khoản này đang bị khóa'
             })
@@ -160,16 +159,10 @@ router.post('/', Auth.authenGTUser, upload.single('image'), async (req, res, nex
  *              403: Tài khoản đã bị khóa
  *              404: Tài khoản không tồn tại
  */
-router.get('/account/:id_account/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
+router.get('/account/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
     try{
-        let id_account = Number(req.params.id_account);
+        let id_account = Auth.tokenData(req).id_account;
         let page = Number(req.params.page_number);
-
-        if(!Account.has(id_account)){
-            return res.status(404).json({
-                message: 'Tài khoản không tồn tại'
-            });
-        }
 
         if(!isNumber(page)){
             return res.status(402).json({
@@ -177,28 +170,15 @@ router.get('/account/:id_account/page/:page_number', Auth.authenGTUser, async(re
             });
         }
 
-        let acc = await Account.selectId(Auth.tokenData(req).id_account);
-
-        if(acc.status != 0){
-            return res.status(403).json({
-                message: 'Tài khoản này đang bị khóa'
-            });
-        }
-
-        if(id_account === acc.id_account || acc.status == 1 || acc.status == 2){
-            let data = await Image.listImageInAccount(id_account, page);
-            let amount = await Image.amountImageInAccount(id_account);
-
-            return res.status(200).json({
-                message: 'Thao tác thành công',
-                data: data,
-                amount: amount
-            });
-        }else{
-            return res.status(401).json({
-                message: 'Tài khoản không có quyền thực hiện'
-            });
-        }        
+        let acc = await Account.selectId(id_account);
+        let data = await Image.listImageInAccount(id_account, page);
+        let amount = await Image.amountImageInAccount(id_account);
+        
+        return res.status(200).json({
+            message: 'Thao tác thành công',
+            data: data,
+            amount: amount
+        });     
     }catch(error){
         console.log(error);
         res.sendStatus(500);
