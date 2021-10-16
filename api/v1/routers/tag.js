@@ -26,6 +26,46 @@ router.get('/all', async (req, res, next) => {
 })
 
 /**
+ * Lấy tất cả thẻ và thông tin trạng thái theo dõi thẻ của người dùng hiện tại
+ * 
+ * @permisson   Người dùng
+ * @return      200: Thành công, trả về danh sách các thẻ
+ */
+ router.get('/me', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let accId = Auth.tokenData(req).id_account;
+        let result = await Tag.selectAllByAccount(accId);
+        res.status(200).json({
+            message: 'Lấy danh sách thẻ thành công',
+            data: result
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tất cả thẻ và thông tin trạng thái theo dõi thẻ của người dùng hiện tại
+ * 
+ * @permisson   Người dùng
+ * @return      200: Thành công, trả về danh sách các thẻ
+ */
+ router.get('/:id/all', async (req, res, next) => {
+    try {
+        let accId = req.params.id;
+        let result = await Tag.selectAllByAccount(accId);
+        res.status(200).json({
+            message: 'Lấy danh sách thẻ thành công',
+            data: result
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
  * Lấy 1 thẻ theo id
  * 
  * @permission  Ai cũng có thể thực thi
