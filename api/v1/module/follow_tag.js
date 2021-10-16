@@ -34,11 +34,13 @@ db.delete = (id_account, id_tag) => {
 
 db.list = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT T.*
-        FROM tag T 
-        INNER JOIN follow_tag F 
-        ON T.id_tag=F.id_tag
-        WHERE F.id_account=$1`,
+        pool.query(`select T.*, 
+            (select count(*) from post_tag PT where T.id_tag=PT.id_tag) total_post,
+            (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
+            true as status
+            from tag T
+            where (select exists(select * from follow_tag FT where T.id_tag=FT.id_tag and FT.id_account=$1))=true
+            `,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 console.log(result);

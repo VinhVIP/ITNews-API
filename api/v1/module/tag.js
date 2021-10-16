@@ -38,9 +38,30 @@ db.has = (id) => {
 
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM tag WHERE id_tag=$1", [id], (err, result) => {
+        pool.query(`select T.*, 
+                (select count(*) from post_tag PT where T.id_tag=$1 and T.id_tag=PT.id_tag) total_post,
+                (select count(*) from follow_tag FT where T.id_tag=$1 and T.id_tag=FT.id_tag) total_follower
+                from tag T
+                where T.id_tag=$1`, [id], (err, result) => {
             if (err) return reject(err);
-            console.log(result.rows);
+            if (result.rowCount > 0) {
+                return resolve({ status: true, data: result.rows[0] });
+            } else {
+                return resolve({ status: false });
+            }
+        })
+    })
+}
+
+db.selectIdByAccount = (id_tag, id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select T.*, 
+                (select count(*) from post_tag PT where T.id_tag=$1 and T.id_tag=PT.id_tag) total_post,
+                (select count(*) from follow_tag FT where T.id_tag=$1 and T.id_tag=FT.id_tag) total_follower,
+                (select exists(select * from follow_tag FT where T.id_tag=$1 and T.id_tag=FT.id_tag and FT.id_account=$2)) as status
+                from tag T
+                where T.id_tag=$1`, [id_tag, id_account], (err, result) => {
+            if (err) return reject(err);
             if (result.rowCount > 0) {
                 return resolve({ status: true, data: result.rows[0] });
             } else {

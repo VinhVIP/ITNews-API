@@ -46,14 +46,14 @@ router.get('/all', async (req, res, next) => {
 })
 
 /**
- * Lấy tất cả thẻ và thông tin trạng thái theo dõi thẻ của người dùng hiện tại
+ * Lấy tất cả thẻ và thông tin trạng thái theo dõi thẻ của người dùng được chỉ định
  * 
- * @permisson   Người dùng
+ * @permisson   All
  * @return      200: Thành công, trả về danh sách các thẻ
  */
- router.get('/:id/all', async (req, res, next) => {
+ router.get('/:id_account/all', async (req, res, next) => {
     try {
-        let accId = req.params.id;
+        let accId = req.params.id_account;
         let result = await Tag.selectAllByAccount(accId);
         res.status(200).json({
             message: 'Lấy danh sách thẻ thành công',
@@ -75,6 +75,64 @@ router.get('/all', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try {
         let result = await Tag.selectId(req.params.id);
+        if (result.status) {
+            res.status(200).json({
+                message: 'Lấy tag thành công',
+                data: result.data
+            })
+        } else {
+            res.status(404).json({
+                message: 'Không tìm thấy tag'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy 1 thẻ theo id và trạng thái follow của ng dùng được chỉ định
+ * 
+ * @permission  Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về thẻ cần lấy
+ *              404: Không tìm thấy thể
+ */
+ router.get('/:id_tag/account/:id_account', async (req, res, next) => {
+    try {
+        let id_tag = req.params.id_tag;
+        let id_account = req.params.id_account;
+
+        let result = await Tag.selectIdByAccount(id_tag, id_account);
+        if (result.status) {
+            res.status(200).json({
+                message: 'Lấy tag thành công',
+                data: result.data
+            })
+        } else {
+            res.status(404).json({
+                message: 'Không tìm thấy tag'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy 1 thẻ theo id của người dùng đang đăng nhập
+ * 
+ * @permission  User
+ * @return      200: Thành công, trả về thẻ cần lấy
+ *              404: Không tìm thấy thể
+ */
+ router.get('/:id_tag/me',Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let id_tag = req.params.id_tag;
+
+        let result = await Tag.selectIdByAccount(id_tag, id_account);
         if (result.status) {
             res.status(200).json({
                 message: 'Lấy tag thành công',
