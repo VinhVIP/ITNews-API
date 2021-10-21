@@ -23,9 +23,11 @@ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
-                post: post.data.post,
-                tags: post.data.tags
+                post: post,
+                tags: tags
+
             });
         }
 
@@ -52,9 +54,11 @@ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
-                post: post.data.post,
-                tags: post.data.tags
+                post: post,
+                tags: tags
+
             });
         }
 
@@ -82,9 +86,11 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
-                post: post.data.post,
-                tags: post.data.tags
+                post: post,
+                tags: tags
+
             });
         }
 
@@ -417,10 +423,10 @@ router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next)
             let result = await Post.changeStatus(id, status_new);
             let isPublic = await Post.isPublic(id);
 
-            if (status_new == 1 && isPublic){
+            if (status_new == 1 && isPublic) {
                 let poster = await Post.selectId(id);
                 let id_followers = await FollowAccount.listFollowingOfLite(poster.id_account);
-                for(let id_follower of id_followers){
+                for (let id_follower of id_followers) {
                     let name = await Account.selectName(id_follower.id_follower);
                     Notification.addNotification(id_follower.id_follower, `${name} đã đăng một bài viết mới`, `/post/${id}`)
                 }
@@ -491,6 +497,43 @@ router.put('/:id/access/:access_new', Auth.authenGTUser, async (req, res, next) 
 })
 
 /**
+ * Lấy TẤT CẢ các bài viết public mới nhất 
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/newest/all', async (req, res, next) => {
+    try {
+        let postsId = await Post.getAllNewest();
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách tất cả bài viết mới thuộc thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
  * Lấy các bài viết public mới nhất theo trang
  * 
  * @permisson   Ai cũng có thể thực thi
@@ -502,12 +545,12 @@ router.get('/newest/:page', async (req, res, next) => {
         let search = req.body.search;
         let postsId;
 
-        if(search){
+        if (search) {
             postsId = await Post.getSearch(page, search);
-        }else{
+        } else {
             postsId = await Post.getNewestPage(page);
         }
-        
+
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {
@@ -675,7 +718,7 @@ router.get('/:id/vote', async (req, res, next) => {
 router.get('/status/:status/:page', Auth.authenGTModer, async (req, res, next) => {
     try {
         let { status, page } = req.params;
-        if (status >=0  || status <= 2) {
+        if (status >= 0 || status <= 2) {
             let postsId = await Post.getPostsByStatus(status, page);
 
             let data = [];

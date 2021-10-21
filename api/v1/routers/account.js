@@ -673,10 +673,11 @@ router.get('/:id/posts', async (req, res, next) => {
         let postsId = await Post.getListPostIdOfAccount(idAcc);
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
-            let p = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectId(postsId[i].id_post);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
-                post: p.data.post,
-                tags: p.data.tags
+                post : post,
+                tags: tags
             });
         }
         res.status(200).json({

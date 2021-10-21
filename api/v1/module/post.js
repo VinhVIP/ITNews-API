@@ -189,6 +189,18 @@ db.getNewestPage = (page) => {
     })
 }
 
+db.getAllNewest = () => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",
+            [],
+            (err, postResult) => {
+                if (err) return reject(err);
+                return resolve(postResult.rows)
+            });
+
+    })
+}
+
 db.getSearch = (page, search) => {
     return new Promise((resolve, reject) => {
         pool.query(`WITH searched AS (
