@@ -2,25 +2,25 @@ const pool = require('../../../database');
 
 const db = {};
 
-db.selectPasswordByUsername = (user)=>{
-    return new Promise ((resolve, reject)=>{
+db.selectPasswordByUsername = (user) => {
+    return new Promise((resolve, reject) => {
         pool.query('SELECT password FROM account WHERE account_name = $1',
-        [user],
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rows[0].password);
-        })
+            [user],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0].password);
+            })
     })
 }
 
-db.selectByUsername = (account_name)=>{
-    return new Promise((resolve, reject)=>{
+db.selectByUsername = (account_name) => {
+    return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM account WHERE account_name = $1',
-        [account_name],
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rows[0]);
-        })
+            [account_name],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
     })
 }
 
@@ -30,44 +30,64 @@ db.hasByUsername = (account_name) => {
             [account_name],
             (err, result) => {
                 if (err) return reject(err);
-                return resolve(result.rowCount>0);
+                return resolve(result.rowCount > 0);
             })
     })
 }
 
-db.selectAll = (id_role) => {
+db.selectAll = () => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT a.id_account, a.id_role, r.name AS role,
-            a.account_name, a.real_name, a.email
-            FROM account a, role r
-            WHERE a.id_role = r.id_role id_role>=$1`, 
-        [id_role], 
-        (err, result) => {
-            if (err) return reject(err);
-            return resolve(result.rows);
-        })
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status, r.name as role, 
+                (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
+                (select count(*) from post p where p.id_account = a.id_account) as num_posts,
+                (select count(*) from vote v where v.id_account = a.id_account and v.type = 1) as reputation,
+                false as status
+            from account a join role r on r.id_role=a.id_role
+            order by a.id_account asc`,
+            [],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    });
+}
+
+db.selectAllByAccount = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status, r.name as role, 
+                (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
+                (select count(*) from post p where p.id_account = a.id_account) as num_posts,
+                (select count(*) from vote v where v.id_account = a.id_account and v.type = 1) as reputation,
+                (select count(*) > 0 from follow_account fa where fa.id_follower=a.id_account and fa.id_following = $1) as status
+            from account a join role r on r.id_role=a.id_role
+            order by a.id_account asc`,
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
     });
 }
 
 db.selectAvatar = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT avatar FROM account WHERE id_account = $1`, 
-        [id_account], 
-        (err, result) => {
-            if (err) return reject(err);
-            return resolve(result.rows[0].avatar);
-        })
+        pool.query(`SELECT avatar FROM account WHERE id_account = $1`,
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0].avatar);
+            })
     });
 }
 
-db.updateVerification = (id, verification)=>{
-    return new Promise((resolve, reject)=>{
+db.updateVerification = (id, verification) => {
+    return new Promise((resolve, reject) => {
         pool.query('UPDATE account SET verification = $1 WHERE id_account = $2',
-        [verification, id],
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rowCount);
-        })
+            [verification, id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount);
+            })
     })
 }
 
@@ -92,11 +112,11 @@ db.selectId = (id) => {
             FROM account A
             INNER JOIN role R ON A.id_role=R.id_role
             WHERE A.id_account=$1`,
-        [id],
-        (err, result) => {
-            if (err) return reject(err);
-            return resolve(result.rows[0]);
-        })
+            [id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
     })
 }
 
@@ -114,14 +134,14 @@ db.selectRole = (id) => {
     })
 }
 
-db.selectName = (id_account)=>{
-    return new Promise((resolve ,reject)=>{
+db.selectName = (id_account) => {
+    return new Promise((resolve, reject) => {
         pool.query('SELECT real_name FROM account WHERE id_account = $1',
-        [id_account],
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rows[0].real_name);
-        })
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0].real_name);
+            })
     })
 }
 
@@ -202,13 +222,13 @@ db.updatePassword = (id, password) => {
     })
 }
 
-db.countAdmin = ()=>{
-    return new Promise((resolve, reject)=>{
+db.countAdmin = () => {
+    return new Promise((resolve, reject) => {
         pool.query('SELECT id_account FROM account WHERE id_role = 1',
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rowCount);
-        });
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount);
+            });
     })
 }
 
