@@ -8,10 +8,29 @@ db.selectId = (id) => {
             TO_CHAR(created :: time, 'hh24:mi') as time_created,
             TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
             TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
-            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified
+            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
+            false as bookmark_status
             FROM post 
             WHERE id_post=$1`,
             [id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
+    })
+}
+
+db.selectIdForUser = (id_post, id_user) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT *,
+            TO_CHAR(created :: time, 'hh24:mi') as time_created,
+            TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
+            TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
+            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
+            (select exists(select * from bookmark where id_post=$1 and id_account=$2) as bookmark_status) 
+            FROM post 
+            WHERE id_post=$1`,
+            [id_post, id_user],
             (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0]);
