@@ -120,6 +120,25 @@ db.selectId = (id) => {
     })
 }
 
+db.selectIdStatus = (idAccount, idUser) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT A.id_account, A.id_role, 
+        R.name role_name, A.real_name, A.email, 
+        A.avatar, A.company, A.phone, A.status,
+        TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
+        TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
+        (select exists(select * from follow_account where id_follower=$1 and id_following=$2)) as status
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$2`,
+            [idAccount, idUser],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
+    })
+}
+
 db.selectRole = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`select CV.id_role, CV.name from 

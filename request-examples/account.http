@@ -3,13 +3,18 @@ POST http://localhost:8000/api/v1/account/login
 Content-Type: application/json
 
 {
-    "account_name": "admin3",
+    "account_name": "vinhit",
     "password": "123456"
 }
 
 ### Lấy tất cả tài khoản
 GET http://localhost:8000/api/v1/account/all
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxMywiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoiYWRtaW4yIiwic3RhdHVzIjowLCJpYXQiOjE2MzE1NDEzNzksImV4cCI6MTYzMTU0NDk3OX0.q61o1lf0emjnv-E7h5n3Rr9RE2eVJQP_RcuLPnvs9TU
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MywiYWNjb3VudF9uYW1lIjoidmluaGl0Iiwic3RhdHVzIjowLCJpYXQiOjE2Mzg0MDkyMjIsImV4cCI6MTY0MDQ4MjgyMn0.ovjE1uSMFZWwx2w-Q5BnjpTEha6aKgh1uHR6P5dEls4
+
+### Lấy thông tin tài khoản, oc status
+GET http://localhost:8000/api/v1/account/1/status
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MywiYWNjb3VudF9uYW1lIjoidmluaGl0Iiwic3RhdHVzIjowLCJpYXQiOjE2Mzg0MDkyMjIsImV4cCI6MTY0MDQ4MjgyMn0.ovjE1uSMFZWwx2w-Q5BnjpTEha6aKgh1uHR6P5dEls4
+
 
 ### Tạo tài khoản
 POST http://localhost:8000/api/v1/account

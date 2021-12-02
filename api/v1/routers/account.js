@@ -654,6 +654,41 @@ router.get('/:id', async (req, res, next) => {
 })
 
 /**
+ * Lấy thông tin 1 tài khoản theo id, có status
+ * 
+ * @permission  Đăng nhập
+ * 
+ * @return      200: trả về tài khoản tìm thấy
+ *              404: Không tìm thấy
+ */
+ router.get('/:id/status', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let idUser = Auth.tokenData(req).id_account;
+        let id = req.params.id;
+        let accountExists = await Account.has(id);
+
+        if (accountExists) {
+            let result = await Account.selectIdStatus(id, idUser);
+
+            res.status(200).json({
+                message: 'Đã tìm thấy tài khoản',
+                data: result
+            })
+        } else {
+            res.status(404).json({
+                message: 'Không tìm thây tài khoản',
+            })
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            message: 'Something wrong!'
+        })
+    }
+})
+
+/**
  * Lấy thông tin chức vụ của 1 tài khoản theo id
  * @permission  Ai cũng có thể thực thi
  * @return      200: trả về chức vụ của tài khoản cần tìm
