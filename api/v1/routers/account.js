@@ -656,14 +656,14 @@ router.get('/:id', async (req, res, next) => {
 /**
  * Lấy thông tin 1 tài khoản theo id, có status
  * 
- * @permission  Đăng nhập
+ * @permission  không cần
  * 
  * @return      200: trả về tài khoản tìm thấy
  *              404: Không tìm thấy
  */
- router.get('/:id/status', Auth.authenGTUser, async (req, res, next) => {
+ router.get('/:id/status/:id_user', async (req, res, next) => {
     try {
-        let idUser = Auth.tokenData(req).id_account;
+        let idUser = req.params.id_user;
         let id = req.params.id;
         let accountExists = await Account.has(id);
 
