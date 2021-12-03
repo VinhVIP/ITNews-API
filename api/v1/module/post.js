@@ -4,8 +4,8 @@ const db = {};
 
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT *,
-        TO_CHAR(created :: time, 'hh24:mi') as time_created,
+        pool.query(`SELECT  A.account_name, A.real_name, A.email, A.avatar, P.*,
+		TO_CHAR(created :: time, 'hh24:mi') as time_created,
         TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
         TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
@@ -13,7 +13,7 @@ db.selectId = (id) => {
         (select count(*) from comment C where C.id_post=$1) as total_comment,
         (select count(*) from vote V where V.id_post=$1) as total_vote,
         (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
-        FROM post P
+        FROM post P INNER JOIN account A on P.id_account=A.id_account
         WHERE P.id_post=$1`,
             [id],
             (err, result) => {
@@ -25,7 +25,7 @@ db.selectId = (id) => {
 
 db.selectIdForUser = (id_post, id_user) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT *,
+        pool.query(`SELECT  A.account_name, A.real_name, A.email, A.avatar, P.*,
         TO_CHAR(created :: time, 'hh24:mi') as time_created,
         TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
         TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
@@ -34,7 +34,7 @@ db.selectIdForUser = (id_post, id_user) => {
         (select count(*) from comment C where C.id_post=1) as total_comment,
         (select count(*) from vote V where V.id_post=1) as total_vote,
         (select count(*) from bookmark B where B.id_post=1) as total_bookmark
-        FROM post P
+        FROM post P INNER JOIN account A on P.id_account=A.id_account
         WHERE P.id_post=1`,
             [id_post, id_user],
             (err, result) => {
