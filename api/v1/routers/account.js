@@ -753,16 +753,27 @@ router.get('/:id/posts', async (req, res, next) => {
  * @return      200: Thành công, trả về số lượng + id các bài viết đã bookmark của tài khoản này
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/bookmarks', Auth.authenGTUser, async (req, res, next) => {
+router.get('/:id/bookmarks', async (req, res, next) => {
     try {
         let id = req.params.id;
 
         let accExists = await Account.has(id);
         if (accExists) {
-            let result = await Bookmark.list(id);
+            let postsId = await Bookmark.list(id);
+            let data = [];
+            for (let i = 0; i < postsId.length; i++) {
+                let post = await Post.selectId(postsId[i].id_post);
+                let tags = await Post.selectTagsOfPost(postsId[i].id_post);
+                data.push({
+                    post: post,
+                    tags: tags
+    
+                });
+            }
+    
             res.status(200).json({
-                message: 'Lấy danh sách bookmark thành công',
-                data: result
+                message: 'Lấy danh sách bài viết nháp thành công',
+                data: data
             })
         } else {
             res.status(404).json({

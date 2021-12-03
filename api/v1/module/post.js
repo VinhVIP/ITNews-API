@@ -5,13 +5,16 @@ const db = {};
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT *,
-            TO_CHAR(created :: time, 'hh24:mi') as time_created,
-            TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
-            TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
-            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
-            false as bookmark_status
-            FROM post 
-            WHERE id_post=$1`,
+        TO_CHAR(created :: time, 'hh24:mi') as time_created,
+        TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
+        TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
+        TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
+        false as bookmark_status,
+        (select count(*) from comment C where C.id_post=$1) as total_comment,
+        (select count(*) from vote V where V.id_post=$1) as total_vote,
+        (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
+        FROM post P
+        WHERE P.id_post=$1`,
             [id],
             (err, result) => {
                 if (err) return reject(err);
@@ -23,13 +26,16 @@ db.selectId = (id) => {
 db.selectIdForUser = (id_post, id_user) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT *,
-            TO_CHAR(created :: time, 'hh24:mi') as time_created,
-            TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
-            TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
-            TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
-            (select exists(select * from bookmark where id_post=$1 and id_account=$2) as bookmark_status) 
-            FROM post 
-            WHERE id_post=$1`,
+        TO_CHAR(created :: time, 'hh24:mi') as time_created,
+        TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
+        TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
+        TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
+        (select exists(select * from bookmark where id_post=$1 and id_account=$2) as bookmark_status) 
+        (select count(*) from comment C where C.id_post=1) as total_comment,
+        (select count(*) from vote V where V.id_post=1) as total_vote,
+        (select count(*) from bookmark B where B.id_post=1) as total_bookmark
+        FROM post P
+        WHERE P.id_post=1`,
             [id_post, id_user],
             (err, result) => {
                 if (err) return reject(err);
