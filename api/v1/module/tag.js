@@ -5,7 +5,7 @@ const db = {};
 db.selectAll = () => {
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
-                (select count(*) from post_tag PT where T.id_tag=PT.id_tag) total_post,
+                (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
                 (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower
                 from tag T`, [], (err, result) => {
             if (err) return reject(err);
@@ -17,7 +17,7 @@ db.selectAll = () => {
 db.selectAllByAccount = (id_account) =>{
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
-                (select count(*) from post_tag PT where T.id_tag=PT.id_tag) total_post,
+                (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
                 (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
                 (select exists(select * from follow_tag FT where T.id_tag=FT.id_tag and FT.id_account=$1)) as status
                 from tag T`, [id_account], (err, result) => {
