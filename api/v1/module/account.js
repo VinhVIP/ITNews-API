@@ -105,13 +105,23 @@ db.has = (id) => {
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-            R.name role_name, A.account_name, A.real_name, A.email, 
-            A.avatar, A.company, A.phone, A.status,
-            TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
-            TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date
-            FROM account A
-            INNER JOIN role R ON A.id_role=R.id_role
-            WHERE A.id_account=$1`,
+        R.name role_name, A.account_name, A.real_name, A.email, 
+        A.avatar, A.company, A.phone, A.status,
+        TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
+        TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
+        (select count(*) from post P where A.id_account=P.id_account and P.status=1 and P.access=1) AS total_post,
+        (select count(*) from follow_account FA where A.id_account=FA.id_follower) as total_follower,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=1 and V.id_post=P.id_post and V.type=1
+            group by P.id_post) as CV) as total_vote_up,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=1 and V.id_post=P.id_post and V.type=0
+            group by P.id_post) as CV) as total_vote_down
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$1`,
             [id],
             (err, result) => {
                 if (err) return reject(err);
