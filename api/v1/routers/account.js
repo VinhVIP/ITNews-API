@@ -763,11 +763,12 @@ router.get('/:id/bookmarks', async (req, res, next) => {
             let data = [];
             for (let i = 0; i < postsId.length; i++) {
                 let post = await Post.selectId(postsId[i].id_post);
+                let acc = await Account.selectId(post.id_account);
                 let tags = await Post.selectTagsOfPost(postsId[i].id_post);
                 data.push({
                     post: post,
+                    author: acc,
                     tags: tags
-    
                 });
             }
     
