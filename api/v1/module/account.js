@@ -105,7 +105,7 @@ db.has = (id) => {
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-            R.name role_name, A.real_name, A.email, 
+            R.name role_name, A.account_name, A.real_name, A.email, 
             A.avatar, A.company, A.phone, A.status,
             TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
             TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date
@@ -123,7 +123,7 @@ db.selectId = (id) => {
 db.selectIdStatus = (idAccount, idUser) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-        R.name role_name, A.real_name, A.email, 
+        R.name role_name, A.account_name, A.real_name, A.email, 
         A.avatar, A.company, A.phone, A.status,
         TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
         TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,

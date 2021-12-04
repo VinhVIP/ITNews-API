@@ -105,6 +105,163 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
 })
 
 /**
+ * Lấy các bài viết công khai, chưa kiểm duyệt
+ * 
+ * @permission  Moder trở lên (xem để kiểm duyệt)
+ * @return      200: Thành công. trả về danh sách bài viết
+ */
+router.get('/browse', Auth.authenGTModer, async (req, res, next) => {
+    try {
+        let postsId = await Post.getPostsForBrowse();
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thành công thành công`,
+            data: data
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy TẤT CẢ các bài viết public mới nhất 
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/newest/all', async (req, res, next) => {
+    try {
+        let postsId = await Post.getAllNewest();
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách tất cả bài viết mới thuộc thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy các bài viết public mới nhất
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/newest', async (req, res, next) => {
+    try {
+        let search = req.body.search;
+        let postsId;
+
+        if (search) {
+            postsId = await Post.getSearch(search);
+        } else {
+            postsId = await Post.getNewest();
+        }
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy các bài viết thuộc tag follow và tài khoản follow mới nhất
+ * 
+ * @permisson   Đăng nhập mới được thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/following', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let postsId = await Post.getFollowing(id_account);
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
  * Lấy 1 bài viết theo id
  * 
  * @permission  Ai cũng có thể thực thi
@@ -200,7 +357,7 @@ router.get('/:id', async (req, res, next) => {
  *              403: Không có quyền xem bài viết
  *              404: Không tìm thấy bài viết  
  */
- router.get('/:id/user', Auth.authenGTUser, async (req, res, next) => {
+router.get('/:id/user', Auth.authenGTUser, async (req, res, next) => {
     try {
         let idUser = Auth.tokenData(req).id_account;
         let id = req.params.id;
@@ -586,127 +743,6 @@ router.put('/:id/access/:access_new', Auth.authenGTUser, async (req, res, next) 
 })
 
 /**
- * Lấy TẤT CẢ các bài viết public mới nhất 
- * 
- * @permisson   Ai cũng có thể thực thi
- * @return      200: Thành công, trả về các bài viết thuộc trang
- */
-router.get('/newest/all', async (req, res, next) => {
-    try {
-        let postsId = await Post.getAllNewest();
-
-        let data = [];
-
-        for (let i = 0; i < postsId.length; i++) {
-            let id_post = postsId[i].id_post;
-
-            let post = await Post.selectId(id_post);
-            let acc = await Account.selectId(post.id_account);
-            let tags = await Post.selectTagsOfPost(id_post);
-
-            data.push({
-                post: post,
-                author: acc,
-                tags: tags
-            })
-        }
-
-        res.status(200).json({
-            message: `Lấy danh sách tất cả bài viết mới thuộc thành công`,
-            data: data
-        })
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-    }
-})
-
-
-/**
- * Lấy các bài viết public mới nhất theo trang
- * 
- * @permisson   Ai cũng có thể thực thi
- * @return      200: Thành công, trả về các bài viết thuộc trang
- */
-router.get('/newest/:page', async (req, res, next) => {
-    try {
-        let page = req.params.page;
-        let search = req.body.search;
-        let postsId;
-
-        if (search) {
-            postsId = await Post.getSearch(page, search);
-        } else {
-            postsId = await Post.getNewestPage(page);
-        }
-
-        let data = [];
-
-        for (let i = 0; i < postsId.length; i++) {
-            let id_post = postsId[i].id_post;
-
-            let post = await Post.selectId(id_post);
-            let acc = await Account.selectId(post.id_account);
-            let tags = await Post.selectTagsOfPost(id_post);
-
-            data.push({
-                post: post,
-                author: acc,
-                tags: tags
-            })
-        }
-
-        res.status(200).json({
-            message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
-            data: data
-        })
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-    }
-})
-
-
-/**
- * Lấy các bài viết thuộc tag follow và tài khoản follow mới nhất theo trang
- * 
- * @permisson   Đăng nhập mới được thực thi
- * @return      200: Thành công, trả về các bài viết thuộc trang
- */
-router.get('/following/:page', Auth.authenGTUser, async (req, res, next) => {
-    try {
-        let id_account = Auth.tokenData(req).id_account;
-        let page = req.params.page;
-        let postsId = await Post.getFollowingPage(id_account, page);
-
-        let data = [];
-
-        for (let i = 0; i < postsId.length; i++) {
-            let id_post = postsId[i].id_post;
-
-            let post = await Post.selectId(id_post);
-            let acc = await Account.selectId(post.id_account);
-            let tags = await Post.selectTagsOfPost(id_post);
-
-            data.push({
-                post: post,
-                author: acc,
-                tags: tags
-            })
-        }
-
-        res.status(200).json({
-            message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
-            data: data
-        })
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
-    }
-})
-
-
-/**
  * Lấy số lượng và danh sách UP VOTE của bài viết
  * 
  * @permisson   Ai cũng có thể thực thi
@@ -798,17 +834,17 @@ router.get('/:id/vote', async (req, res, next) => {
 })
 
 /**
- * Lấy các bài viết theo status, theo trang
+ * Lấy các bài viết theo status
  * 
- * @permission  Moder trở lên (xem để kiểm duyệt)
+ * @permission  Moder trở lên 
  * @return      200: Thành công. trả về danh sách bài viết
  *              400: Giá trị status không hợp lệ
  */
-router.get('/status/:status/:page', Auth.authenGTModer, async (req, res, next) => {
+router.get('/status/:status', Auth.authenGTModer, async (req, res, next) => {
     try {
-        let { status, page } = req.params;
+        let { status } = req.params;
         if (status >= 0 || status <= 2) {
-            let postsId = await Post.getPostsByStatus(status, page);
+            let postsId = await Post.getPostsByStatus(status);
 
             let data = [];
 
@@ -827,7 +863,7 @@ router.get('/status/:status/:page', Auth.authenGTModer, async (req, res, next) =
             }
 
             res.status(200).json({
-                message: `Lấy danh sách bài viết thuộc trang ${page} thành công`,
+                message: `Lấy danh sách bài viết thành công thành công`,
                 data: data
             })
         } else {

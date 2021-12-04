@@ -202,10 +202,10 @@ db.deletePostTag = (id_post) => {
     })
 }
 
-db.getNewestPage = (page) => {
+db.getNewest = () => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC LIMIT 10 OFFSET $1",
-            [(page - 1) * 10],
+        pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",
+            [],
             (err, postResult) => {
                 if (err) return reject(err);
                 return resolve(postResult.rows)
@@ -230,15 +230,15 @@ db.getSearch = (page, search) => {
     return new Promise((resolve, reject) => {
         pool.query(`WITH searched AS (
                 SELECT id_post, view, 
-                POSITION(LOWER($2) IN LOWER(title)) AS title, 
-                POSITION(LOWER($2) IN LOWER(content)) AS content 
+                POSITION(LOWER($1) IN LOWER(title)) AS title, 
+                POSITION(LOWER($1) IN LOWER(content)) AS content 
                 FROM post
                 WHERE status=1 AND access=1)
             SELECT * FROM searched 
             WHERE title >0 OR content >0 
             ORDER BY view DESC
-            LIMIT 10 OFFSET $1`,
-        [(page - 1) * 10, search],
+            `,
+        [search],
         (err, postResult) => {
             if (err) return reject(err);
             return resolve(postResult.rows)
@@ -247,7 +247,7 @@ db.getSearch = (page, search) => {
     })
 }
 
-db.getFollowingPage = (id_account, page) => {
+db.getFollowing = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`(SELECT P.*
             FROM post P
@@ -264,8 +264,8 @@ db.getFollowingPage = (id_account, page) => {
                     INNER JOIN follow_account F ON F.id_follower=P.id_account
                     WHERE F.id_following=$1 AND P.status=1 AND P.access=1 
                     ORDER BY P.created DESC )
-            LIMIT 10 OFFSET $2`,
-            [id_account, (page - 1) * 10],
+            `,
+            [id_account],
             (err, postResult) => {
                 if (err) return reject(err);
                 return resolve(postResult.rows)
@@ -338,10 +338,20 @@ db.getTotalView = (id_account) => {
     })
 }
 
-db.getPostsByStatus = (status, page) => {
+db.getPostsByStatus = (status) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post P WHERE P.status=$1 ORDER BY P.created DESC LIMIT 10 OFFSET $2",
-            [status, page], (err, result) => {
+        pool.query("SELECT id_post FROM post P WHERE P.status=$1 ORDER BY P.created",
+            [status], (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    })
+}
+
+db.getPostsForBrowse = () => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT id_post FROM post P WHERE P.status=0 and P.access=1 ORDER BY P.created",
+            [], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
             })
