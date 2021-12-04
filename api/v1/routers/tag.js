@@ -31,7 +31,7 @@ router.get('/all', async (req, res, next) => {
  * @permisson   Người dùng
  * @return      200: Thành công, trả về danh sách các thẻ
  */
- router.get('/me', Auth.authenGTUser, async (req, res, next) => {
+router.get('/me', Auth.authenGTUser, async (req, res, next) => {
     try {
         let accId = Auth.tokenData(req).id_account;
         let result = await Tag.selectAllByAccount(accId);
@@ -51,7 +51,7 @@ router.get('/all', async (req, res, next) => {
  * @permisson   All
  * @return      200: Thành công, trả về danh sách các thẻ
  */
- router.get('/:id_account/all', async (req, res, next) => {
+router.get('/:id_account/all', async (req, res, next) => {
     try {
         let accId = req.params.id_account;
         let result = await Tag.selectAllByAccount(accId);
@@ -98,7 +98,7 @@ router.get('/:id', async (req, res, next) => {
  * @return      200: Thành công, trả về thẻ cần lấy
  *              404: Không tìm thấy thể
  */
- router.get('/:id_tag/account/:id_account', async (req, res, next) => {
+router.get('/:id_tag/account/:id_account', async (req, res, next) => {
     try {
         let id_tag = req.params.id_tag;
         let id_account = req.params.id_account;
@@ -127,7 +127,7 @@ router.get('/:id', async (req, res, next) => {
  * @return      200: Thành công, trả về thẻ cần lấy
  *              404: Không tìm thấy thể
  */
- router.get('/:id_tag/me',Auth.authenGTUser, async (req, res, next) => {
+router.get('/:id_tag/me', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id_account = Auth.tokenData(req).id_account;
         let id_tag = req.params.id_tag;
@@ -225,13 +225,13 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
  * @return      200: thành công, trả về danh sách
  *              404: Thẻ không tồn tại
  */
-router.get('/:id/posts/:page', async (req, res, next) => {
+router.get('/:id/posts', async (req, res, next) => {
     try {
-        let { id, page } = req.params;
+        let { id } = req.params;
 
         let tagExists = await Tag.has(id);
         if (tagExists) {
-            let postsId = await Post.getPostOfTag(id, page);
+            let postsId = await Post.getPostOfTag(id);
             let data = [];
 
             for (let i = 0; i < postsId.length; i++) {

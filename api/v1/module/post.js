@@ -30,12 +30,12 @@ db.selectIdForUser = (id_post, id_user) => {
         TO_CHAR(created :: date, 'dd/mm/yyyy') as day_created,
         TO_CHAR(last_modified :: time, 'hh24:mi') as time_last_modified,
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
-        (select exists(select * from bookmark where id_post=$1 and id_account=$2) as bookmark_status) 
-        (select count(*) from comment C where C.id_post=1) as total_comment,
-        (select count(*) from vote V where V.id_post=1) as total_vote,
-        (select count(*) from bookmark B where B.id_post=1) as total_bookmark
+        (select exists(select * from bookmark where id_post=$1 and id_account=$2)) as bookmark_status,
+        (select count(*) from comment C where C.id_post=$1) as total_comment,
+        (select count(*) from vote V where V.id_post=$1) as total_vote,
+        (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
         FROM post P
-        WHERE P.id_post=1`,
+        WHERE P.id_post=$1`,
             [id_post, id_user],
             (err, result) => {
                 if (err) return reject(err);
@@ -58,14 +58,14 @@ db.selectTagsOfPost = (id) => {
     })
 }
 
-db.isPublic = (id_post)=>{
-    return new Promise((resolve ,reject)=>{
+db.isPublic = (id_post) => {
+    return new Promise((resolve, reject) => {
         pool.query('SELECT id_post FROM post WHERE id_post=$1 and access=1',
-        [id_post],
-        (err, result)=>{
-            if(err) return reject(err);
-            return resolve(result.rowCount>0);
-        })
+            [id_post],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount > 0);
+            })
     })
 }
 
@@ -238,11 +238,11 @@ db.getSearch = (page, search) => {
             WHERE title >0 OR content >0 
             ORDER BY view DESC
             `,
-        [search],
-        (err, postResult) => {
-            if (err) return reject(err);
-            return resolve(postResult.rows)
-        });
+            [search],
+            (err, postResult) => {
+                if (err) return reject(err);
+                return resolve(postResult.rows)
+            });
 
     })
 }
@@ -313,16 +313,16 @@ db.getUnlistedPosts = (id_account) => {
     })
 }
 
-db.getPostOfTag = (id_tag, page) => {
+db.getPostOfTag = (id_tag) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT P.id_post
         FROM post p
         JOIN post_tag PT ON P.id_post = PT.id_post
         WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
         ORDER BY P.created DESC
-        LIMIT 10 OFFSET $2`,
-            [id_tag, (page - 1) * 10], (err, result) => {
-                if (err) return reject(err);
+        `,
+            [id_tag], (err, result) => {
+                if (err) return reject(err)
                 return resolve(result.rows)
             })
     })
