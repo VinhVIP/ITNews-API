@@ -35,7 +35,7 @@ db.delete = (id_account, id_tag) => {
 db.list = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
-            (select count(*) from post_tag PT where T.id_tag=PT.id_tag) total_post,
+            (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
             (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
             true as status
             from tag T
