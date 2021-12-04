@@ -11,7 +11,8 @@ db.selectId = (id) => {
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
         false as bookmark_status,
         (select count(*) from comment C where C.id_post=$1) as total_comment,
-        (select count(*) from vote V where V.id_post=$1) as total_vote,
+        (select count(*) from vote V where V.id_post=$1 and V.type=0) as total_vote_down,
+        (select count(*) from vote V where V.id_post=$1 and V.type=1) as total_vote_up,
         (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
         FROM post P
         WHERE P.id_post=$1`,
@@ -32,7 +33,8 @@ db.selectIdForUser = (id_post, id_user) => {
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
         (select exists(select * from bookmark where id_post=$1 and id_account=$2)) as bookmark_status,
         (select count(*) from comment C where C.id_post=$1) as total_comment,
-        (select count(*) from vote V where V.id_post=$1) as total_vote,
+        (select count(*) from vote V where V.id_post=$1 and V.type=0) as total_vote_down,
+        (select count(*) from vote V where V.id_post=$1 and V.type=1) as total_vote_up,
         (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
         FROM post P
         WHERE P.id_post=$1`,
