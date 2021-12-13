@@ -110,7 +110,10 @@ db.selectId = (id) => {
         TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
         TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
         (select count(*) from post P where A.id_account=P.id_account and P.status=1 and P.access=1) AS total_post,
+		(select count(*) from follow_tag FT where FT.id_account=A.id_account) AS total_tag_follow,
         (select count(*) from follow_account FA where A.id_account=FA.id_follower) as total_follower,
+		(select count(*) from follow_account FA where A.id_account=FA.id_following) as total_following,
+		(select sum(view) from post P where P.id_account=A.id_account) as total_view,
         (select sum(count_vote) from (select count(V.id_post) as count_vote
             from post P, vote V 
             where P.id_account=1 and V.id_post=P.id_post and V.type=1
