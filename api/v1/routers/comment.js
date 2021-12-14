@@ -25,7 +25,7 @@ router.post('/:id_post/comment', Auth.authenGTUser, async(req, res, next)=>{
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể bình luận'
             })
@@ -209,7 +209,7 @@ router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(r
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể bình luận'
             });
@@ -266,7 +266,7 @@ router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async(req, res
         let content = req.body.content;
         content = content.trim();
 
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể chỉnh sửa bình luận'
             });
@@ -323,7 +323,7 @@ router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async(req, 
     try{
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let idCmt = req.params.id_cmt;
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể xóa bình luận'
             });

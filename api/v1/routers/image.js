@@ -86,13 +86,13 @@ router.delete('/:id_image', Auth.authenGTUser, async(req, res, next)=>{
         let poster = await Image.selectAccount(id_image);
         let path = await Image.selectUrl(id_image);
 
-        if(acc.status !=0){
+        if(acc.account_status !=0){
             return res.status(403).json({
                 message: 'Tài khoản này đang bị khóa'
             })
         }
 
-        if(poster === acc.id_account || acc.status == 1 || acc.status == 2){
+        if(poster === acc.id_account || acc.account_status == 1 || acc.account_status == 2){
             fs.unlinkSync(path);
             let del = await Image.deleteImage(id_image);
             return res.status(200).json({
@@ -124,7 +124,7 @@ router.post('/', Auth.authenGTUser, upload.single('image'), async (req, res, nex
         let file = req.file;
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
     
-        if(acc.status !=0){
+        if(acc.account_status !=0){
             fs.unlinkSync(file.path);
             return res.status(403).json({
                 message: 'Tài khoản này đang bị khóa'
@@ -210,7 +210,7 @@ router.patch('/change/:id_image', Auth.authenGTUser, upload.single('image'), asy
         let file = req.file;
         let image = await Image.selectImage(id_image);
 
-        if(acc.status != 0){
+        if(acc.account_status != 0){
             return res.status(403).json({
                 message: 'Tài khoản này đang bị khóa'
             });
