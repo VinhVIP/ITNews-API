@@ -37,7 +37,7 @@ db.hasByUsername = (account_name) => {
 
 db.selectAll = () => {
     return new Promise((resolve, reject) => {
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.name as role, 
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
         (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
         (select count(*) from post p where p.id_account = a.id_account) as num_posts,
         (select count(*) from vote v inner join post p on p.id_post=v.id_post where p.id_account=a.id_account and v.type=1) as reputation,
@@ -54,7 +54,7 @@ db.selectAll = () => {
 
 db.selectAllByAccount = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.name as role, 
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
                 (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
                 (select count(*) from post p where p.id_account = a.id_account) as num_posts,
                 (select count(*) from vote v inner join post p on p.id_post=v.id_post where p.id_account=a.id_account and v.type=1) as reputation,
@@ -105,7 +105,7 @@ db.has = (id) => {
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-        R.name role_name, A.account_name, A.real_name, A.email, 
+        R.id_role as id_role, R.name role_name, A.account_name, A.real_name, A.email, 
         A.avatar, A.company, A.phone, A.status as account_status,
         TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
         TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
@@ -136,7 +136,7 @@ db.selectId = (id) => {
 db.selectIdStatus = (idAccount, idUser) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-        R.name role_name, A.account_name, A.real_name, A.email, 
+        R.id_role as id_role, R.name role_name, A.account_name, A.real_name, A.email, 
         A.avatar, A.company, A.phone, A.status as account_status,
         TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
         TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
