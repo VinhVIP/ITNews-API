@@ -116,11 +116,11 @@ db.selectId = (id) => {
 		(select sum(view) from post P where P.id_account=A.id_account) as total_view,
         (select sum(count_vote) from (select count(V.id_post) as count_vote
             from post P, vote V 
-            where P.id_account=1 and V.id_post=P.id_post and V.type=1
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=1
             group by P.id_post) as CV) as total_vote_up,
         (select sum(count_vote) from (select count(V.id_post) as count_vote
             from post P, vote V 
-            where P.id_account=1 and V.id_post=P.id_post and V.type=0
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=0
             group by P.id_post) as CV) as total_vote_down
         FROM account A
         INNER JOIN role R ON A.id_role=R.id_role
@@ -137,10 +137,23 @@ db.selectIdStatus = (idAccount, idUser) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
         R.name role_name, A.account_name, A.real_name, A.email, 
-        A.avatar, A.company, A.phone, A.status,
+        A.avatar, A.company, A.phone, A.status as account_status,
         TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
         TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
-        (select exists(select * from follow_account where id_follower=$1 and id_following=$2)) as status
+        (select exists(select * from follow_account where id_follower=$1 and id_following=$2)) as status,
+		(select count(*) from post P where A.id_account=P.id_account and P.status=1 and P.access=1) AS total_post,
+		(select count(*) from follow_tag FT where FT.id_account=A.id_account) AS total_tag_follow,
+        (select count(*) from follow_account FA where A.id_account=FA.id_follower) as total_follower,
+		(select count(*) from follow_account FA where A.id_account=FA.id_following) as total_following,
+		(select sum(view) from post P where P.id_account=A.id_account) as total_view,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=1
+            group by P.id_post) as CV) as total_vote_up,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=0
+            group by P.id_post) as CV) as total_vote_down
         FROM account A
         INNER JOIN role R ON A.id_role=R.id_role
         WHERE A.id_account=$1`,
