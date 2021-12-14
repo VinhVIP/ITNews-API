@@ -56,7 +56,7 @@ router.post('/login', async (req, res, next) => {
             let acc = await Account.selectByUsername(username);
             let match = await bcrypt.compare(password, acc.password);
 
-            if (acc.status == 1) {
+            if (acc.account_status == 1) {
                 let valid = await LockAccount.check(acc.id_account);
                 if (valid) {
                     Account.updateStatus(acc.id_account, 0);
@@ -68,7 +68,7 @@ router.post('/login', async (req, res, next) => {
                     "id_account": acc.id_account,
                     "id_role": acc.id_role,
                     "account_name": acc.account_name,
-                    "status": acc.status,
+                    "account_status": acc.account_status,
                 }
                 let days_token = await Information.selectToken();
                 const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
@@ -278,7 +278,7 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next) => {
         let acc_boss = await Account.selectId(id_account_boss);
         let acc_lock = await Account.selectId(id_account_lock);
 
-        if (acc_boss.status != 0 || acc_boss.id_role >= acc_lock.id_role) {
+        if (acc_boss.account_status != 0 || acc_boss.id_role >= acc_lock.id_role) {
             return res.status(403).json({
                 message: 'Tài khoản không có quyền thực hiện',
             });
@@ -290,7 +290,7 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next) => {
             });
         }
 
-        if (acc_lock.status != 0) {
+        if (acc_lock.account_status != 0) {
             return res.status(202).json({
                 message: 'Tài khoản này đã bị khóa'
             })
@@ -412,7 +412,7 @@ router.post('/:id/confirm', async (req, res, next) => {
                 "id_account": acc.id_account,
                 "id_role": acc.id_role,
                 "account_name": acc.account_name,
-                "status": acc.status,
+                "account_status": acc.account_status,
             }
             let days_token = await Information.selectToken();
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
@@ -1058,7 +1058,7 @@ router.patch('/:id/unlock', Auth.authenGTModer, async (req, res, next) => {
     let acc_boss = await Account.selectId(id_account_boss);
     let acc_lock = await Account.selectId(id_account_lock);
 
-    if (acc_boss.status != 0 || acc_boss.id_role >= acc_lock.id_role || acc_lock.status == 2) {
+    if (acc_boss.account_status != 0 || acc_boss.id_role >= acc_lock.id_role || acc_lock.account_status == 2) {
         return res.status(403).json({
             message: 'Tài khoản không có quyền thực hiện'
         });
