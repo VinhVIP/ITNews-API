@@ -450,7 +450,7 @@ router.get('/:id/user', Auth.authenGTUser, async (req, res, next) => {
  */
 router.post('/', Auth.authenGTUser, async (req, res, next) => {
     try {
-        let { title, content, tags } = req.body;
+        let { title, content, tags, access } = req.body;
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa

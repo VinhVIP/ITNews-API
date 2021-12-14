@@ -95,7 +95,7 @@ db.has = (id) => {
 
 db.addPost = (id_account, post) => {
     return new Promise((resolve, reject) => {
-        pool.query("INSERT INTO post (id_account, title, content) VALUES ($1, $2, $3) RETURNING *",
+        pool.query("INSERT INTO post (id_account, title, content, access) VALUES ($1, $2, $3, $4) RETURNING *",
             [id_account, post.title, post.content],
             (err, result) => {
                 if (err) return reject(err);
