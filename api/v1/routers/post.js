@@ -533,7 +533,7 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
-        if (post.status) {
+        if (post !== null) {
             // Người viết mới được sửa
             if (post.data.post.id_account === acc.id_account) {
                 let { title, content, access, tags } = req.body;
