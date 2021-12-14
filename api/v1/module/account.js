@@ -143,7 +143,7 @@ db.selectIdStatus = (idAccount, idUser) => {
         (select exists(select * from follow_account where id_follower=$1 and id_following=$2)) as status
         FROM account A
         INNER JOIN role R ON A.id_role=R.id_role
-        WHERE A.id_account=$2`,
+        WHERE A.id_account=$1`,
             [idAccount, idUser],
             (err, result) => {
                 if (err) return reject(err);
