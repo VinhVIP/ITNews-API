@@ -524,7 +524,6 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
         let id_post = req.params.id;
 
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
-        
 
         // Tài khoản bị khóa
         if (acc.account_status != 0) {
@@ -533,11 +532,11 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
-        let postExists = await Post.has(id);
+        let postExists = await Post.has(id_post);
         if (postExists) {
             let post = await Post.selectId(id_post);
             // Người viết mới được sửa
-            if (post.data.post.id_account === acc.id_account) {
+            if (post.id_account === acc.id_account) {
                 let { title, content, access, tags } = req.body;
 
                 if (title && content && access, tags) {
