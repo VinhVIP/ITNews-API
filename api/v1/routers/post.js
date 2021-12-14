@@ -454,7 +454,7 @@ router.post('/', Auth.authenGTUser, async (req, res, next) => {
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể viết bài'
             })
@@ -527,7 +527,7 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
         let post = await Post.selectId(id_post);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể sửa bài'
             })
@@ -610,7 +610,7 @@ router.delete('/:id', Auth.authenGTUser, async (req, res, next) => {
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể xóa bài'
             })
