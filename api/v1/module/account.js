@@ -56,7 +56,7 @@ db.selectAllByAccount = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
                 (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
-                (select count(*) from post p where p.id_account = a.id_account) as num_posts,
+                (select count(*) from post p where p.id_account = a.id_account and p.access=1 and p.status=1) as num_posts,
                 (select count(*) from vote v inner join post p on p.id_post=v.id_post where p.id_account=a.id_account and v.type=1) as reputation,
                 (select count(*) > 0 from follow_account fa where fa.id_follower=a.id_account and fa.id_following = $1) as status
             from account a join role r on r.id_role=a.id_role
