@@ -70,10 +70,10 @@ db.selectAccount = (id_notificatioin)=>{
 
 db.listNotification = (id_account)=>{
     return new Promise((resolve ,reject)=>{
-        pool.query(`SELECT id_notification, content, status 
-                    FROM notification 
-                    WHERE id_account = $1
-                    ORDER BY id_notification`,
+        pool.query(`SELECT *
+        FROM notification 
+        WHERE id_account = $1
+        ORDER BY id_notification desc`,
         [id_account],
         (err, result)=>{
             if(err) return reject(err);
