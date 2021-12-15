@@ -222,6 +222,42 @@ router.get('/newest', async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy các bài viết theo thứ tự rating cao -> thấp
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết thuộc trang
+ */
+router.get('/trending', async (req, res, next) => {
+    try {
+        let postsId = await Post.getTrending();
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 
 /**
  * Lấy các bài viết thuộc tag follow và tài khoản follow mới nhất

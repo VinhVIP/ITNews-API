@@ -204,6 +204,22 @@ db.deletePostTag = (id_post) => {
     })
 }
 
+db.getTrending = () => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select P.id_post, count(P.id_post) rating
+        from post P, vote V 
+        where P.id_post=V.id_post 
+        group by P.id_post
+        order by rating desc`,
+            [],
+            (err, postResult) => {
+                if (err) return reject(err);
+                return resolve(postResult.rows)
+            });
+
+    })
+}
+
 db.getNewest = () => {
     return new Promise((resolve, reject) => {
         pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",
