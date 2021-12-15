@@ -110,6 +110,17 @@ db.updateRead = (id_feedback)=>{
     })
 }
 
+db.updateUnRead = (id_feedback)=>{
+    return new Promise((resolve, reject)=>{
+        pool.query('UPDATE feedback SET status = 0 WHERE id_feedback = $1',
+        [id_feedback],
+        (err, result)=>{
+            if(err) return reject(err);
+            return resolve(result.rows)
+        })
+    })
+}
+
 db.delete = (id_feedback)=>{
     return new Promise((resolve, reject)=>{
         pool.query('DELETE FROM feedback WHERE id_feedback = $1',

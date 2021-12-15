@@ -156,7 +156,7 @@ router.post('/', Auth.authenGTUser, async (req, res, next) => {
 })
 
 /**
- * Đọc phản hồi
+ * Đánh dấu đã đọc phản hồi
  * 
  * @permission Admin
  */
@@ -171,7 +171,32 @@ router.put('/:id_feedback/read', Auth.authenAdmin, async (req, res, next) =>{
         } else {
             await Feedback.updateRead(id_feedback);
             return res.status(200).json({
-                message: "Đọc phản hồi thành công!"
+                message: "Đánh dấu đã đọc phản hồi thành công!"
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Đánh dấu chưa đọc phản hồi
+ * 
+ * @permission Admin
+ */
+ router.put('/:id_feedback/unread', Auth.authenAdmin, async (req, res, next) =>{
+    try {
+        let id_feedback = req.params.id_feedback;
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(404).json({
+                message: "không có phản hồi này"
+            })
+        } else {
+            await Feedback.updateUnRead(id_feedback);
+            return res.status(200).json({
+                message: "Đánh dấu chưa đọc phản hồi thành công!"
             })
         }
     } catch (err) {
