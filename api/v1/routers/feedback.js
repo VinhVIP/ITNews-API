@@ -23,7 +23,7 @@ router.get('/information/:id_feedback', Auth.authenAdmin, async (req, res, next)
         let read = await Feedback.updateRead(id_feedback);
         let data = await Feedback.selectID(id_feedback);
 
-        return res.json({
+        return res.status(200).json({
             message: "thao tác thành công",
             data: data
         })
@@ -35,17 +35,34 @@ router.get('/information/:id_feedback', Auth.authenAdmin, async (req, res, next)
 })
 
 /**
- * Lấy tất cả feedback
+ * Lấy tất cả feedback chưa đọc
  * @permission  admin
- * @query        is_unread, page, num_rows
- 
  */
 router.get('/unread', Auth.authenAdmin, async (req, res, next) => {
     try {
         let data = [];
         data = await Feedback.selectUnread();
 
-        return res.json({
+        return res.status(200).json({
+            message: "thao tác thành công",
+            data: data
+        })
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tất cả feedback
+ * @permission  admin
+ */
+ router.get('/all', Auth.authenAdmin, async (req, res, next) => {
+    try {
+        let data = [];
+        data = await Feedback.selectAll();
+
+        return res.status(200).json({
             message: "thao tác thành công",
             data: data
         })
@@ -101,7 +118,7 @@ router.delete('/:id_feedback', Auth.authenAdmin, async (req, res, next) => {
             })
         } else {
             let deleted = await Feedback.delete(id_feedback);
-            return res.json({
+            return res.status(200).json({
                 message: "Thao tác thành công"
             })
         }
@@ -129,6 +146,31 @@ router.post('/', Auth.authenGTUser, async (req, res, next) => {
         } else {
             return res.status(400).json({
                 message: "Thiếu body"
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Đọc phản hồi
+ * 
+ * @permission Admin
+ */
+router.put('/:id_feedback/read', Auth.authenAdmin, async (req, res, next) =>{
+    try {
+        let id_feedback = req.params.id_feedback;
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(404).json({
+                message: "không có phản hồi này"
+            })
+        } else {
+            await Feedback.updateRead(id_feedback);
+            return res.status(200).json({
+                message: "Đọc phản hồi thành công!"
             })
         }
     } catch (err) {
