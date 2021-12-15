@@ -49,14 +49,13 @@ db.selectID = (id_feedback)=>{
     })
 }
 
-db.selectAll = (page, num_rows)=>{
+db.selectAll = ()=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT f.id_feedback, f.subject, f.date_time, f.status, a.email, a.name FROM 
+        pool.query(`SELECT f.id_feedback, f.subject, f.date_time, f.status, a.id_account, a.account_name, a.email, a.real_name FROM 
                     feedback f, account a
                     WHERE f.id_account = a.id_account
-                    ORDER BY f.date_time
-                    LIMIT $1 OFFSET $2`,
-        [num_rows, (page-1)*num_rows],
+                    ORDER BY f.date_time`,
+        [],
         (err, result)=>{
             if(err) return reject(err);
             return resolve(result.rows)
@@ -74,14 +73,13 @@ db.selectAmountAll = ()=>{
     })
 }
 
-db.selectUnread = (page, num_rows)=>{
+db.selectUnread = ()=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT f.id_feedback, f.subject, f.date_time, f.status, a.email FROM 
+        pool.query(`SELECT f.id_feedback, f.subject, f.date_time, f.status, a.id_account, a.account_name, a.email, a.real_name FROM 
                     feedback f, account a 
                     WHERE f.status = 0 AND f.id_account = a.id_account
-                    ORDER BY f.date_time
-                    LIMIT $1 OFFSET $2`,
-        [num_rows, (page-1)*num_rows],
+                    ORDER BY f.date_time`,
+        [],
         (err, result)=>{
             if(err) return reject(err);
             return resolve(result.rows)
