@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 
 var Auth = require('../../../auth');
 var Post = require('../module/post');
@@ -307,11 +308,30 @@ router.get('/following', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/:id', async (req, res, next) => {
     try {
+        const authorizationHeader = req.headers['authorization'];
+
         let id = req.params.id;
 
         let postExists = await Post.has(id);
         if (postExists) {
-            let post = await Post.selectId(id);
+            let post;
+            if (authorizationHeader) {
+                const token = authorizationHeader.split(' ')[1];
+                if (!token) return res.sendStatus(401);
+
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        return res.sendStatus(403);
+                    }
+                })
+
+                let idUser = Auth.tokenData(req).id_account;
+                post = await Post.selectIdForUser(id, idUser);
+            } else {
+                post = await Post.selectId(id);
+            }
+
             let author = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id);
 
