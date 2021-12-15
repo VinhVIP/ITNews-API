@@ -477,6 +477,55 @@ router.post('/', async (req, res, next) => {
 });
 
 /**
+ * Thay đổi thông tin tài khoản, chỉ có thể đổi của chính bản thân
+ * 
+ * @permission  phải đăng nhập thì mới được thực thi (user trở lên)
+ * @return      401: Không được sửa thông tin của người khác
+ *              400: Thiếu thông tin bắt buộc
+ *              200: Cập nhật thành công, trả về tài khoản vừa cập nhật
+ */
+router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let updateId = req.params.id;
+        let userId = Auth.tokenData(req).id_account;
+
+        if (updateId != userId) {
+            return res.status(401).json({
+                message: 'Không thể sửa đổi thông tin của người khác'
+            })
+        }
+
+        if (!req.body.real_name) {
+            res.status(400).json({
+                message: 'real_name là bắt buộc'
+            })
+        }
+
+        var account = {
+            'real_name': req.body.real_name ?? '',
+            'birth': req.body.birth ?? '',
+            'gender': req.body.gender ?? 0,
+            'company': req.body.company ?? '',
+            'phone': req.body.phone ?? '',
+            'avatar': req.body.avatar ?? '',
+        }
+
+        let result = await Account.update(updateId, account);
+
+        res.status(200).json({
+            message: 'Cập nhật thông tin tài khoản thành công',
+            data: result
+        })
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({
+            message: 'Something wrong'
+        })
+    }
+
+})
+
+/**
  * Lấy thông tin của tài khoản
  * @permission  người đã đăng nhập
  * @returns     200: lấy dữ liệu thành công
@@ -661,7 +710,7 @@ router.get('/:id', async (req, res, next) => {
  * @return      200: trả về tài khoản tìm thấy
  *              404: Không tìm thấy
  */
- router.get('/:id/status/:id_user', async (req, res, next) => {
+router.get('/:id/status/:id_user', async (req, res, next) => {
     try {
         let idUser = req.params.id_user;
         let id = req.params.id;
@@ -771,7 +820,7 @@ router.get('/:id/bookmarks', async (req, res, next) => {
                     tags: tags
                 });
             }
-    
+
             res.status(200).json({
                 message: 'Lấy danh sách bài viết nháp thành công',
                 data: data
