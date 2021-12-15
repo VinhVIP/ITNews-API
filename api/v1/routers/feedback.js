@@ -34,6 +34,7 @@ router.get('/information/:id_feedback', Auth.authenAdmin, async (req, res, next)
     }
 })
 
+
 /**
  * Lấy tất cả feedback chưa đọc
  * @permission  admin
@@ -173,6 +174,37 @@ router.put('/:id_feedback/read', Auth.authenAdmin, async (req, res, next) =>{
                 message: "Đọc phản hồi thành công!"
             })
         }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy 1 feedback, không đánh dấu đọc
+ * @permission      admin
+ * @params        id_feedback
+ * @returns     202, 412
+ */
+ router.get('/:id_feedback', Auth.authenAdmin, async (req, res, next) => {
+    try {
+        let id_feedback = req.params.id_feedback;
+
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(400).json({
+                message: "không có phản hồi này"
+            })
+        }
+
+        let data = await Feedback.selectID(id_feedback);
+
+        return res.status(200).json({
+            message: "thao tác thành công",
+            data: data
+        })
+
     } catch (err) {
         console.log(err);
         return res.sendStatus(500);

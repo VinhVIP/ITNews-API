@@ -36,7 +36,7 @@ db.has = (id_feedback)=>{
 
 db.selectID = (id_feedback)=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT f.*, a.email, a.name, 
+        pool.query(`SELECT f.*, a.email, a.id_account, a.account_name, a.real_name, 
             TO_CHAR(date_time :: time, 'hh24:mi') as time, 
             TO_CHAR(date_time :: date, 'dd/mm/yyyy') as day
             FROM feedback f, account a
