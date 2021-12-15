@@ -501,6 +501,15 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
+        let date = checkDate(req.body.birth)
+        if (date === false) {
+            return res.status(400).json({
+                message: 'Ngày sinh không hợp lệ'
+            })
+        } else {
+            req.body.birth = date;
+        }
+
         var account = {
             'real_name': req.body.real_name ?? '',
             'birth': req.body.birth ?? '',
@@ -524,6 +533,38 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
     }
 
 })
+
+function checkDate(date) {
+    let arr = date.split('/');
+
+    let day = parseInt(arr[0]);
+    let month = parseInt(arr[1]);
+    let year = parseInt(arr[2]);
+
+    if (checkMonth(month) && day > 0 && day <= lastDayOfMonth(day, month, year)) {
+        return month + '/' + day + '/' + year;
+    }
+    return false;
+}
+
+function lastDayOfMonth(day, month, year) {
+    if (month == 2) {
+        if (isLeapYear(year)) return 29;
+        return 28;
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+        return 30;
+    }
+    return 31;
+}
+
+function checkMonth(month) {
+    return month > 0 && month <= 12;
+}
+
+function isLeapYear(year) {
+    if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)) return true;
+    return false;
+}
 
 /**
  * Lấy thông tin của tài khoản
