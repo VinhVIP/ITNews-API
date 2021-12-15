@@ -51,16 +51,12 @@ router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
  * 
  * @return      200: Lấy thành công
  */
-router.get('/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
+router.get('/all', Auth.authenGTUser, async(req, res, next)=>{
     try{
-        let page = req.params.page_number;
         let id_account = Auth.tokenData(req).id_account;
-        let amount = await Notification.amount(id_account);
-
-        let data = await Notification.listNotification(id_account, page);
+        let data = await Notification.listNotification(id_account);
         return res.status(200).json({
             message: 'List thông báo thành công',
-            amount: amount,
             data: data,
         });
     }catch(err){
