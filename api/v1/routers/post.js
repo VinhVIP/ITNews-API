@@ -179,6 +179,50 @@ router.get('/newest/all', async (req, res, next) => {
     }
 })
 
+/**
+ * Tìm kiếm bài viết theo từ khóa
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * @return      200: Thành công, trả về các bài viết 
+ */
+router.get('/search', async (req, res, next) => {
+    try {
+        let { k } = req.query;
+        if (!k || k.trim().length == 0) {
+            return res.status(400).json({
+                message: "Chưa có từ khóa tìm kiếm"
+            })
+        }
+
+        k = k.toLowerCase();
+
+        let postsId = await Post.getSearch(k);
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết tìm kiếm thành công`,
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
 
 /**
  * Lấy các bài viết public mới nhất
@@ -188,14 +232,7 @@ router.get('/newest/all', async (req, res, next) => {
  */
 router.get('/newest', async (req, res, next) => {
     try {
-        let search = req.body.search;
-        let postsId;
-
-        if (search) {
-            postsId = await Post.getSearch(search);
-        } else {
-            postsId = await Post.getNewest();
-        }
+        let postsId = await Post.getNewest();
 
         let data = [];
 

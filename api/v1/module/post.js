@@ -244,19 +244,12 @@ db.getAllNewest = () => {
     })
 }
 
-db.getSearch = (page, search) => {
+db.getSearch = (search) => {
     return new Promise((resolve, reject) => {
-        pool.query(`WITH searched AS (
-                SELECT id_post, view, 
-                POSITION(LOWER($1) IN LOWER(title)) AS title, 
-                POSITION(LOWER($1) IN LOWER(content)) AS content 
-                FROM post
-                WHERE status=1 AND access=1)
-            SELECT * FROM searched 
-            WHERE title >0 OR content >0 
-            ORDER BY view DESC
-            `,
-            [search],
+        pool.query(`select id_post
+        from post
+        where status=1 and access=1 and (lower(title) like $1 or lower(content) like $1)`,
+            ['%' + search + '%'],
             (err, postResult) => {
                 if (err) return reject(err);
                 return resolve(postResult.rows)
