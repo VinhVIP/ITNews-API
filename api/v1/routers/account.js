@@ -640,14 +640,26 @@ router.get('/:id_account/avatar', async (req, res, next) => {
  */
 router.get('/all', async (req, res, next) => {
     try {
-        // let acc = await Account.selectId(Auth.tokenData(req).id_account);
-        // if (acc.status != 0) {
-        //     return res.status(400).json({
-        //         message: 'Tài khoản đang bị khóa'
-        //     })
-        // } else {
-        var list = await Account.selectAll();
+        const authorizationHeader = req.headers['authorization'];
 
+        let list;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(403);
+                }
+            })
+
+            let acc = await Account.selectId(Auth.tokenData(req).id_account);
+            list = await Account.selectAllByAccount(acc.id_account);
+        } else {
+            list = await Account.selectAll();
+        }
         return res.status(200).json({
             message: 'Lấy danh sách tài khoản thành công',
             data: list
