@@ -94,4 +94,41 @@ router.get('/:id_notification', Auth.authenGTUser, async (req, res, next) => {
     }
 });
 
+/**
+ * Vô thông báo để xác nhận đã xem
+ * @permisson   Tài khoản đã tạo
+ *              
+ * @return      200: Vô thành công, trả về link để vô trang cần đến
+ *              404: Thông báo không tồn tại
+ */
+router.get('/:id_notification/read', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_notification = req.params.id_notification;
+        let exist = await Notification.has(id_notification);
+        let id_account = Auth.tokenData(req).id_account;
+
+        if (!exist) {
+            return res.status(404).json({
+                message: 'Thông báo không tồn tại'
+            });
+        } else {
+            let notification = await Notification.selectID(id_notification)
+            if (notification.id_account !== id_account) {
+                return res.status(403).json({
+                    message: 'Bạn không có quyền đọc thông báo của người khác!'
+                })
+            }
+
+            await Notification.readNotification(id_notification);
+            return res.status(200).json({
+                message: 'Đọc thông báo thành công',
+            });
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
+
 module.exports = router;

@@ -83,7 +83,7 @@ db.listNotification = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT *
         FROM notification 
-        WHERE id_account = $1
+        WHERE id_account = $1 and status=0
         ORDER BY id_notification desc`,
             [id_account],
             (err, result) => {
