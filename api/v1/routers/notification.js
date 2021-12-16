@@ -14,12 +14,12 @@ var Notification = require('../module/notification');
  *              401: Tải khoản không có quyền
  *              404: Thông báo không tồn tại
  */
-router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.delete('/:id_notification', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let id_notificatioin = req.params.id_notification;
         let exist = await Notification.has(id_notificatioin);
-        
-        if(!exist){
+
+        if (!exist) {
             return res.status(404).json({
                 message: 'Thông báo không tồn tại'
             });
@@ -27,20 +27,20 @@ router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
 
         let id_account = await Notification.selectAccount(id_notificatioin);
 
-        if(id_account != Auth.tokenData(req).id_account){
+        if (id_account != Auth.tokenData(req).id_account) {
             return res.status(401).json({
                 message: 'Bạn không có quyền xóa thông báo này',
                 id1: id_account,
                 id2: Auth.tokenData(req).id_account
             });
-        }else{
+        } else {
             let deleted = await Notification.deleteNotification(id_notificatioin);
             return res.status(200).json({
                 message: 'Xóa thông báo thành công'
             });
         }
-        
-    }catch(err){
+
+    } catch (err) {
         return res.sendStatus(500);
     }
 });
@@ -51,15 +51,15 @@ router.delete('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
  * 
  * @return      200: Lấy thành công
  */
-router.get('/all', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.get('/all', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let id_account = Auth.tokenData(req).id_account;
         let data = await Notification.listNotification(id_account);
         return res.status(200).json({
             message: 'List thông báo thành công',
             data: data,
         });
-    }catch(err){
+    } catch (err) {
         return res.sendStatus(500);
     }
 });
@@ -71,25 +71,25 @@ router.get('/all', Auth.authenGTUser, async(req, res, next)=>{
  * @return      200: Vô thành công, trả về link để vô trang cần đến
  *              404: Thông báo không tồn tại
  */
-router.get('/:id_notification', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.get('/:id_notification', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let id_notificatioin = req.params.id_notification;
         let exist = await Notification.has(id_notificatioin);
 
-        if(!exist){
+        if (!exist) {
             return res.status(404).json({
                 message: 'Thông báo không tồn tại'
             });
-        }else{
-            let status = await Notification.readNotification(id_notificatioin);
-            let url = await Notification.selectUrl(id_notificatioin);
+        } else {
+            let data = await Notification.selectID(id_notificatioin);
             return res.status(200).json({
-                message: 'Vô thành công, chuyển đường dẫn',
-                link: url
+                message: 'Lấy thông báo thành công',
+                data: data
             });
         }
-        
-    }catch(err){
+
+    } catch (err) {
+        console.log(err);
         return res.sendStatus(500);
     }
 });
