@@ -35,15 +35,7 @@ db.delete = (id_account, id_account_follower) => {
 // Những tài khoản mà id_account theo dõi
 db.listFollowerOf = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT A.id_account, R.id_role, R.name role_name, A.account_name, A.real_name, A.email, a.avatar, A.birth, A.company, A.phone, A.create_date, 
-                    (select count(*) from follow_account fa where fa.id_follower=A.id_account) as num_followers, 
-                    (select count(*) from post p where p.id_account = A.id_account) as num_posts,
-                    (select count(*) from vote v where v.id_account = A.id_account and v.type = 1) as reputation,
-                    (select count(*) > 0 from follow_account fa where fa.id_follower=A.id_account and fa.id_following = $1) as status
-            FROM account A
-            INNER JOIN follow_account F ON A.id_account=F.id_follower
-            INNER JOIN role R ON R.id_role=A.id_role
-            WHERE F.id_following=$1`,
+        pool.query(`select id_follower from follow_account where id_following=$1`,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
