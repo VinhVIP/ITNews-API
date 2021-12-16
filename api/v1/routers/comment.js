@@ -41,6 +41,7 @@ router.post('/:id_post/comment', Auth.authenGTUser, async(req, res, next)=>{
         if(content != ""){
             let create = await Comment.addComment(acc.id_account, id_post, content);
             let change = await Comment.changeParent(create);
+            change = await Comment.selectId(change.id_cmt);
             return res.status(200).json({
                 message: 'comment thành công',
                 data : change,
