@@ -164,11 +164,12 @@ db.selectAccountComment = (id_cmt)=>{
 
 db.selectId = (id_cmt)=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT *,
-        TO_CHAR(date_time:: date, 'dd/mm/yyyy') AS day,
-        TO_CHAR(date_time:: time, 'hh24:mi') AS time
-        FROM comment 
-        where id_cmt = $1`,
+        pool.query(`select a.id_account, a.real_name, a.account_name, 
+        c.id_cmt, c.content, c.id_cmt_parent, c.status,
+        TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
+        TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
+        from comment c, account a 
+        where c.id_cmt=$1 and c.id_account = a.id_account`,
         [id_cmt],
         (err, result)=>{
             if(err) return reject(err);
