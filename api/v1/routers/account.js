@@ -930,13 +930,38 @@ router.get('/:id/following', async (req, res, next) => {
     try {
         let id = req.params.id;
 
+        const authorizationHeader = req.headers['authorization'];
+
+        let idUser = false;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(401);
+                }
+            })
+
+            idUser = Auth.tokenData(req).id_account;
+        }
+
         let accExists = await Account.has(id);
         if (accExists) {
             let result = await FollowAccount.listFollowingOf(id);
+            let data = [];
+            for (let accFollowing of result) {
+                let acc;
+                if (idUser === false) acc = await Account.selectId(accFollowing.id_following);
+                else acc = await Account.selectIdStatus(accFollowing.id_following, idUser);
+                data.push(acc)
+            }
 
             res.status(200).json({
                 message: 'Lấy danh sách các tài khoản theo dõi người này thành công',
-                data: result
+                data: data
             })
         } else {
             res.status(404).json({

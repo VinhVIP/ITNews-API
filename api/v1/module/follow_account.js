@@ -65,11 +65,7 @@ db.listFollowingOfLite = (id_account)=>{
 // Những tài khoản theo dõi id_account
 db.listFollowingOf = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`SELECT A.id_account, R.id_role, R.name role_name, A.account_name, A.real_name, A.email, a.avatar, A.birth, A.company, A.phone, A.create_date, A.status
-        FROM account A
-        INNER JOIN follow_account F ON A.id_account=F.id_following
-        INNER JOIN role R ON R.id_role=A.id_role
-        WHERE F.id_follower=$1`,
+        pool.query(`select id_following from follow_account where id_follower=$1`,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
