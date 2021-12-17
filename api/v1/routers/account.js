@@ -698,7 +698,8 @@ router.get('/all', async (req, res, next) => {
     try {
         const authorizationHeader = req.headers['authorization'];
 
-        let list;
+        let list = [];
+        let ids = await Account.selectAllId();
 
         if (authorizationHeader) {
             const token = authorizationHeader.split(' ')[1];
@@ -711,10 +712,20 @@ router.get('/all', async (req, res, next) => {
                 }
             })
 
-            let acc = await Account.selectId(Auth.tokenData(req).id_account);
-            list = await Account.selectAllByAccount(acc.id_account);
+            let idUser = Auth.tokenData(req).id_account;
+
+            for (let accId of ids) {
+                let acc = await Account.selectIdStatus(accId.id_account, idUser);
+                list.push(acc)
+            }
+
+            // let acc = await Account.selectId(Auth.tokenData(req).id_account);
+            // list = await Account.selectAllByAccount(acc.id_account);
         } else {
-            list = await Account.selectAll();
+            for (let accId of ids) {
+                let acc = await Account.selectId(accId.id_account);
+                list.push(acc)
+            }
         }
         return res.status(200).json({
             message: 'Lấy danh sách tài khoản thành công',

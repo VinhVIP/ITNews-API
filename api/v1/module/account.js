@@ -35,6 +35,17 @@ db.hasByUsername = (account_name) => {
     })
 }
 
+db.selectAllId = () => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select id_account from account`,
+            [],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    });
+}
+
 db.selectAll = () => {
     return new Promise((resolve, reject) => {
         pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
