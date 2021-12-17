@@ -434,6 +434,47 @@ router.post('/:id/confirm', async (req, res, next) => {
 })
 
 /**
+ * Đổi password của cá nhân
+ * @params      id: để chơi, không dùng đến (để 1 số bất kỳ thì nó cũng hoạt động dc)
+ * 
+ * @body        
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      201: Đổi thành công
+ *              400: Mật khẩu mới chưa được nhập
+ */
+router.put('/:id/change_password', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let new_password = req.body.new_password;
+        let id_account = Auth.tokenData(req).id_account;
+
+        if (new_password.trim() != "") {
+            bcrypt.hash(new_password, saltRounds, async (err, hash) => {
+                new_password = hash;
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(500);
+                }
+                let changePassword = await Account.updatePassword(id_account, new_password);
+
+                res.status(201).json({
+                    message: 'Thay đổi mật khẩu thành công',
+                })
+            });
+        } else {
+            return res.status(400).json({
+                message: 'Thiếu thông tin'
+            });
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
+
+/**
  * Thêm 1 tài khoản thường
  * 
  * @permisson   Ai cũng có thể thực thi
