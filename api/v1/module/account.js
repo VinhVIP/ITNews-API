@@ -102,6 +102,17 @@ db.has = (id) => {
     })
 }
 
+db.checkPassword = (id_account, pass) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT account_name FROM account WHERE id_account=$1 and password=$2",
+            [id_account, pass],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount > 0)
+            })
+    })
+}
+
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
