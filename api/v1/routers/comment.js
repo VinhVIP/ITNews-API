@@ -387,7 +387,7 @@ router.put('/:id_post/comment/:id_cmt/status/:new_status', Auth.authenGTUser, as
         }
 
         if (acc !== poster.id_account) {
-            if (acc.id_role != 1) {
+            if (acc.id_role === 3) {
                 return res.status(401).json({
                     message: 'Bạn không có quyền này'
                 });
