@@ -1238,9 +1238,12 @@ router.put('/change/information', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
+        let birth = null;
+        if(req.body.birth !== '') birth = req.body.birth;
+
         var account = {
             'real_name': req.body.real_name ?? '',
-            'birth': req.body.birth ?? '',
+            'birth': birth,
             'gender': req.body.gender ?? 0,
             'company': req.body.company ?? '',
             'phone': req.body.phone ?? '',
