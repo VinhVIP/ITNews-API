@@ -70,8 +70,8 @@ db.deleteParent = (id_comment)=>{
 
 db.listCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, a.account_name,
-        a.avatar, c.id_cmt, c.content, c.id_cmt_parent,
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.id_role,
+        a.avatar, c.id_cmt, c.content, c.id_cmt_parent, c.status,
         TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
         TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
         from comment c, account a 
@@ -88,8 +88,8 @@ db.listCommentInPost = (id_post) =>{
 
 db.listMainCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.avatar,
-            c.id_cmt, c.content, c.id_cmt_parent,
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.id_role, a.avatar,
+            c.id_cmt, c.content, c.id_cmt_parent, c.status,
             TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
             TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
             from comment c, account a 
@@ -107,8 +107,8 @@ db.listMainCommentInPost = (id_post) =>{
 
 db.listReplyInComment = (id_cmt) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.avatar,
-            c.id_cmt, c.content, c.id_cmt_parent,
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.id_role, a.avatar,
+            c.id_cmt, c.content, c.id_cmt_parent, c.status,
             TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
             TO_CHAR(c.date_time:: time, 'hh24:mi') AS time 
             from comment c, account a 
@@ -125,7 +125,7 @@ db.listReplyInComment = (id_cmt) =>{
 
 db.listAllCommentInPost = (id_post) =>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.avatar, 
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.id_role, a.avatar, 
             c.id_cmt, c.content, c.id_cmt_parent, c.status,
             TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
             TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
@@ -164,7 +164,7 @@ db.selectAccountComment = (id_cmt)=>{
 
 db.selectId = (id_cmt)=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.avatar, 
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.id_role, a.avatar, 
         c.id_cmt, c.content, c.id_cmt_parent, c.status,
         TO_CHAR(c.date_time:: date, 'dd/mm/yyyy') AS day,
         TO_CHAR(c.date_time:: time, 'hh24:mi') AS time
