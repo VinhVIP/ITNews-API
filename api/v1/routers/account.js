@@ -566,18 +566,24 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
-        let date = checkDate(req.body.birth)
-        if (date === false) {
-            return res.status(400).json({
-                message: 'Ngày sinh không hợp lệ'
-            })
-        } else {
-            req.body.birth = date;
+        let birth = null;
+
+        if(req.body.birth === null || req.body.birth === ''){
+            birth = null;
+        }else{
+            let date = checkDate(req.body.birth)
+            if (date === false) {
+                return res.status(400).json({
+                    message: 'Ngày sinh không hợp lệ'
+                })
+            } else {
+                birth = date;
+            }
         }
 
         var account = {
             'real_name': req.body.real_name ?? '',
-            'birth': req.body.birth ?? '',
+            'birth': birth,
             'gender': req.body.gender ?? 0,
             'company': req.body.company ?? '',
             'phone': req.body.phone ?? '',
