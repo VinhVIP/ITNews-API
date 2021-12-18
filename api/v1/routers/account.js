@@ -407,6 +407,15 @@ router.post('/:id/confirm', async (req, res, next) => {
         let verify = await Verification.selectCode(id_account);
         let match = await bcrypt.compare(code, verify);
         if (match) {
+            bcrypt.hash("123456", saltRounds, async (err, hash) => {
+                let new_password = hash;
+                let changePassword = await Account.updatePassword(id_account, new_password);
+
+                // return res.status(201).json({
+                //     message: 'Thay đổi mật khẩu thành công',
+                // })
+            });
+
             let acc = await Account.selectId(id_account);
             var data = {
                 "id_account": acc.id_account,
@@ -418,7 +427,7 @@ router.post('/:id/confirm', async (req, res, next) => {
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
 
             return res.status(200).json({
-                message: 'đăng nhập thành công',
+                message: 'đăng nhập thành công, mật khẩu reset 123456',
                 accessToken: accessToken,
                 data: data
             });
