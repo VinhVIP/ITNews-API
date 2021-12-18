@@ -765,10 +765,11 @@ router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next)
 
             if (status_new == 1 && isPublic) {
                 let poster = await Post.selectId(id);
-                let id_followers = await FollowAccount.listFollowingOfLite(poster.id_account);
+                let author = await Account.selectId(poster.id_account);
+                let name = author.real_name;
+                let id_followers = await FollowAccount.listFollowingOf(poster.id_account);
                 for (let id_follower of id_followers) {
-                    let name = await Account.selectName(id_follower.id_follower);
-                    Notification.addNotification(id_follower.id_follower, `${name} đã đăng một bài viết mới`, `/post/${id}`)
+                    Notification.addNotification(id_follower.id_following, `${name} đã đăng một bài viết mới`, `/post/${id}`)
                 }
             }
 
