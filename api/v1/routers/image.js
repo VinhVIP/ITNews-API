@@ -271,8 +271,10 @@ router.patch('/change/:id_image', Auth.authenGTUser, upload.single('image'), asy
             }
 
             let change = await Image.changeImage(id_image, file.path);
+            let img = await Image.selectID(id_image);
             return res.status(200).json({
-                message: 'Thay đổi thành công'
+                message: 'Thay đổi thành công',
+                data: img
             });
         } else {
             return res.status(401).json({
