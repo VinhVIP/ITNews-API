@@ -141,6 +141,54 @@ router.delete('/:id_image', Auth.authenGTUser, async(req, res, next)=>{
 });
 
 /**
+ * Xóa hình theo id_image
+ * @permisson   Những người có tài khoản đăng hình đấy hoặc admin hoặc mor
+ *              Không dùng cho tài khoản bị khóa
+ * @return      200: Xóa thành công
+ *              401: Tài khoản không có quyền thực hiện
+ *              403: Tài khoản đã bị khóa
+ *              404: Không thấy hình
+ */
+ router.delete('/:id_image/db', Auth.authenGTUser, async(req, res, next)=>{
+    try{
+        let id_image = req.params.id_image;
+        let has = await Image.has(id_image);
+
+        if(!has){
+            return res.status(404).json({
+                message: 'Hình này không tồn tại'
+            })
+        }
+
+        let acc = await Account.selectId(Auth.tokenData(req).id_account);
+        let poster = await Image.selectAccount(id_image);
+        // let path = await Image.selectUrl(id_image);
+
+        if(acc.account_status != 0){
+            return res.status(403).json({
+                message: 'Tài khoản này đang bị khóa'
+            })
+        }
+
+        if(poster === acc.id_account){
+            // fs.unlinkSync(path);
+            let del = await Image.deleteImage(id_image);
+            return res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }else{
+            return res.status(401).json({
+                message: 'Tài khoản không có quyền thực hiện'
+            })
+        }       
+
+    }catch(error){
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
+
+/**
  * Đăng ảnh
  * @body        file hình
  * @permisson   Những người có tài khoản
