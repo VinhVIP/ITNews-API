@@ -70,7 +70,7 @@ db.has = (id_image)=>{
 
 db.listImageInAccount = (id_account)=>{
     return new Promise((resolve, reject)=>{
-        pool.query(`SELECT id_image FROM image 
+        pool.query(`SELECT id_image, url FROM image 
         WHERE id_account = $1 
         ORDER BY id_image`,
         [id_account],
