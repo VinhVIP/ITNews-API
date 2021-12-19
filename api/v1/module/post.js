@@ -185,8 +185,8 @@ db.deletePost = (id) => {
 
 db.update = (id, post) => {
     return new Promise((resolve, reject) => {
-        pool.query("UPDATE post SET title=$1, content=$2, last_modified=CURRENT_TIMESTAMP WHERE id_post=$3",
-            [post.title, post.content, id],
+        pool.query("UPDATE post SET title=$1, content=$2, access=$3 last_modified=CURRENT_TIMESTAMP WHERE id_post=$4",
+            [post.title, post.content, post.access, id],
             (err, result) => {
                 if (err) return reject(err);
                 console.log(result);
