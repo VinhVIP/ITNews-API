@@ -26,6 +26,36 @@ var upload = multer({
     storage: storage,
 });
 
+
+/**
+ * Lấy các id_image theo page của tài khoản đã đăng
+ * @permisson   Những người có tài khoản
+ *              Những tài khoản admin, mor được xem tất cả hình
+ *              Không dùng cho tài khoản bị khóa
+ * @return      200: Lấy ảnh thành công, trả về các id
+ *              401: Tài khoản không có quyền xem của người khác
+ *              402: Sai đinh dạng page number
+ *              403: Tài khoản đã bị khóa
+ *              404: Tài khoản không tồn tại
+ */
+ router.get('/account', Auth.authenGTUser, async(req, res, next)=>{
+    try{
+        let id_account = Auth.tokenData(req).id_account;
+
+        let data = await Image.listImageInAccount(id_account);
+        let amount = await Image.amountImageInAccount(id_account);
+        
+        return res.status(200).json({
+            message: 'Thao tác thành công',
+            data: data,
+            amount: amount
+        });     
+    }catch(error){
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
+
 /**
  * Lấy hình theo id
  * @permisson   Những người có tài khoản
@@ -142,43 +172,6 @@ router.post('/', Auth.authenGTUser, upload.single('image'), async (req, res, nex
                 data: save,
             });
         }
-    }catch(error){
-        console.log(error);
-        res.sendStatus(500);
-    }
-});
-
-/**
- * Lấy các id_image theo page của tài khoản đã đăng
- * @permisson   Những người có tài khoản
- *              Những tài khoản admin, mor được xem tất cả hình
- *              Không dùng cho tài khoản bị khóa
- * @return      200: Lấy ảnh thành công, trả về các id
- *              401: Tài khoản không có quyền xem của người khác
- *              402: Sai đinh dạng page number
- *              403: Tài khoản đã bị khóa
- *              404: Tài khoản không tồn tại
- */
-router.get('/account/page/:page_number', Auth.authenGTUser, async(req, res, next)=>{
-    try{
-        let id_account = Auth.tokenData(req).id_account;
-        let page = Number(req.params.page_number);
-
-        if(!isNumber(page)){
-            return res.status(402).json({
-                message: 'page number sai định dạng'
-            });
-        }
-
-        let acc = await Account.selectId(id_account);
-        let data = await Image.listImageInAccount(id_account, page);
-        let amount = await Image.amountImageInAccount(id_account);
-        
-        return res.status(200).json({
-            message: 'Thao tác thành công',
-            data: data,
-            amount: amount
-        });     
     }catch(error){
         console.log(error);
         res.sendStatus(500);

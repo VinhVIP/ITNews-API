@@ -68,13 +68,12 @@ db.has = (id_image)=>{
     });
 }
 
-db.listImageInAccount = (id_account, page)=>{
+db.listImageInAccount = (id_account)=>{
     return new Promise((resolve, reject)=>{
         pool.query(`SELECT id_image FROM image 
         WHERE id_account = $1 
-        ORDER BY id_image
-        LIMIT 10 OFFSET $2 `,
-        [id_account, (page-1)*10],
+        ORDER BY id_image`,
+        [id_account],
         (err, result)=>{
             if(err) return reject(err);
             return resolve(result.rows);
