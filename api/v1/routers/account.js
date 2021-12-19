@@ -517,6 +517,21 @@ router.post('/', async (req, res, next) => {
                     console.log(err);
                     return res.sendStatus(500);
                 }
+
+                let accountNameExists = await Account.hasByUsername(account_name);
+                if(accountNameExists){
+                    return res.status(400).json({
+                        message: 'Tên tài khoản đã tồn tại!'
+                    })
+                }
+
+                let emailExists = await Account.hasEmail(email);
+                if(emailExists){
+                    return res.status(400).json({
+                        message: 'Email này đã được sử dụng!'
+                    })
+                }
+
                 let avatar = await Information.selectAvatar();
                 let acc = { account_name, real_name, email, password, id_role, avatar };
                 let insertId = await Account.add(acc);

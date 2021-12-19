@@ -35,6 +35,17 @@ db.hasByUsername = (account_name) => {
     })
 }
 
+db.hasEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM account WHERE email = $1",
+            [email],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount > 0);
+            })
+    })
+}
+
 db.selectAllId = () => {
     return new Promise((resolve, reject) => {
         pool.query(`select id_account from account`,
