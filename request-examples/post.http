@@ -46,7 +46,7 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LC
 
 
 ### Lấy danh sách bài viết mới nhất theo trang
-GET http://localhost:8000/api/v1/post/newest/1
+GET http://localhost:8000/api/v1/post/newest?page=1
 
 
 ### Lấy danh sách bài viết từ tài khoản và tag follow theo trang

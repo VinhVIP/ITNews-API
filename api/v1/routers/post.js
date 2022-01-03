@@ -232,7 +232,11 @@ router.get('/search', async (req, res, next) => {
  */
 router.get('/newest', async (req, res, next) => {
     try {
-        let postsId = await Post.getNewest();
+        let page = req.query.page;
+        let postsId;
+
+        if (page > 0) postsId = await Post.getNewest(page);
+        else postsId = await Post.getNewest();
 
         let data = [];
 
