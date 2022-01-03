@@ -219,7 +219,7 @@ db.getTrending = () => {
     })
 }
 
-db.getNewest = ([page = 0]) => {
+db.getNewest = (page = 0) => {
     if (page === 0) {
         return new Promise((resolve, reject) => {
             pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",

@@ -235,7 +235,7 @@ router.get('/newest', async (req, res, next) => {
         let page = req.query.page;
         let postsId;
 
-        if (page > 0) postsId = await Post.getNewest(page);
+        if (page) postsId = await Post.getNewest(page);
         else postsId = await Post.getNewest();
 
         let data = [];
