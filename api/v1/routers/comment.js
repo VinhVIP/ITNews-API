@@ -17,7 +17,7 @@ var Comment = require('../module/comment');
  *              403: Tài khoản đã bị khóa
  *              404: Không tìm thấy bài post đó
  */
-router.post('/:id_post/comment', Auth.authenGTUser, async(req, res, next)=>{
+router.post('/:id_post/comment', Auth.authenGTUser, async (req, res, next) => {
     try {
         let content = req.body.content;
         content = content.trim();
@@ -25,28 +25,28 @@ router.post('/:id_post/comment', Auth.authenGTUser, async(req, res, next)=>{
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể bình luận'
             })
         }
 
         let existPost = await Post.has(id_post);
-        if(!existPost){
+        if (!existPost) {
             return res.status(404).json({
                 message: 'Không tìm thấy post',
             })
         }
 
-        if(content != ""){
+        if (content != "") {
             let create = await Comment.addComment(acc.id_account, id_post, content);
             let change = await Comment.changeParent(create);
+            change = await Comment.selectId(change.id_cmt);
             return res.status(200).json({
                 message: 'comment thành công',
-                data : change,
-                account: acc
+                data: change,
             })
-        }else{
+        } else {
             return res.status(400).json({
                 message: 'thiếu dữ liệu'
             })
@@ -65,12 +65,12 @@ router.post('/:id_post/comment', Auth.authenGTUser, async(req, res, next)=>{
  * @return      200: Yêu cầu thành công, trả về 1 list comment gồm :id_account, real_name, avatar, id_comment, content, date_time, id_cmt_parent
  *              404: Bài viết không tồn tại
  */
-router.get('/:id_post/comment', async(req, res, next)=>{
+router.get('/:id_post/comment', async (req, res, next) => {
     try {
         let idPost = req.params.id_post;
         let existPost = await Post.has(idPost);
 
-        if(!existPost){
+        if (!existPost) {
             return res.status(404).json({
                 message: 'Không tìm thấy post'
             })
@@ -95,12 +95,12 @@ router.get('/:id_post/comment', async(req, res, next)=>{
  * @return      200: Yêu cầu thành công, trả về 1 list comment gồm :id_account, real_name, avatar, id_comment, content, date_time, id_cmt_parent
  *              404: Bài viết không tồn tại
  */
- router.get('/:id_post/comment/main', async(req, res, next)=>{
+router.get('/:id_post/comment/main', async (req, res, next) => {
     try {
         let idPost = req.params.id_post;
         let existPost = await Post.has(idPost);
 
-        if(!existPost){
+        if (!existPost) {
             return res.status(404).json({
                 message: 'Không tìm thấy post'
             })
@@ -125,12 +125,12 @@ router.get('/:id_post/comment', async(req, res, next)=>{
  * @return      200: Yêu cầu thành công, trả về 1 list comment gồm :id_account, real_name, avatar, id_comment, content, date_time, id_cmt_parent
  *              404: Không thấy bình luận chính
  */
- router.get('/:id_post/comment/reply/:id_cmt_parent', async(req, res, next)=>{
+router.get('/:id_post/comment/reply/:id_cmt_parent', async (req, res, next) => {
     try {
         let idParent = id_cmt_parent;
         let existParent = await Image.has(idParent);
 
-        if(!existParent){
+        if (!existParent) {
             return res.status(404).json({
                 message: 'Không tìm thấy bình luận chính'
             })
@@ -157,24 +157,24 @@ router.get('/:id_post/comment', async(req, res, next)=>{
  *              401: Tài khoản không có quyền thực hiện
  *              404: Không tìm thấy bài viết
  */
-router.get('/:id_post/comment/all', Auth.authenGTUser, async(req, res, next)=>{
+router.get('/:id_post/comment/all', Auth.authenGTUser, async (req, res, next) => {
     try {
         let idPost = req.params.id_post;
         let existPost = await Post.has(idPost);
         let poster = await Post.selectAccountPostId(idPost);
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
-        if(!existPost){
+        if (!existPost) {
             return res.status(404).json({
                 message: 'Không tìm thấy post'
             });
         }
 
-        if(acc.id_account !== poster.id_account){
-            if(acc.id_role<1 || acc.id_role>2)
-            return res.status(401).json({
-                message: 'Bạn không có quyền xem'
-            });
+        if (acc.id_account !== poster.id_account) {
+            if (acc.id_role < 1 || acc.id_role > 2)
+                return res.status(401).json({
+                    message: 'Bạn không có quyền xem'
+                });
         }
 
         let list = await Comment.listCommentInPost(idPost);
@@ -200,7 +200,7 @@ router.get('/:id_post/comment/all', Auth.authenGTUser, async(req, res, next)=>{
  *              404: Không tìm thấy bình luận cha
  *              
  */
-router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(req, res, next)=>{
+router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async (req, res, next) => {
     try {
         let idPost = req.params.id_post;
         let idParent = req.params.id_cmt_parent;
@@ -209,7 +209,7 @@ router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(r
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
 
         // Tài khoản bị khóa
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể bình luận'
             });
@@ -218,26 +218,26 @@ router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(r
         let existCmt = await Comment.has(idParent);
         let idPostOfCmt = await Comment.selectPostComment(idParent)
 
-        if(!existCmt){
+        if (!existCmt) {
             return res.status(404).json({
                 message: 'Không tìm thấy comment cũ',
             });
         }
 
-        if(idPostOfCmt.id_post != idPost){
-            return res.status(401). json({
+        if (idPostOfCmt.id_post != idPost) {
+            return res.status(401).json({
                 message: 'bài đăng và bình luận không khớp',
             });
         }
 
-        if(content){
+        if (content) {
             let create = await Comment.addCommentWithParent(acc.id_account, idPost, idParent, content);
+            let data = await Comment.selectId(create.id_cmt);
             res.status(200).json({
                 message: 'tạo comment thành công',
-                data: create,
-                account: acc
+                data: data
             });
-        }else{
+        } else {
             req.status(400).json({
                 message: 'Không có dữ liệu'
             });
@@ -258,15 +258,15 @@ router.post('/:id_post/comment/:id_cmt_parent/reply', Auth.authenGTUser, async(r
  *              401: Không có quyền sửa bình luận của người khác
  *              404: Không tìm thấy bài đăng hoặc bình luận
  */
-router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let idPost = req.params.id_post;
         let idCmt = req.params.id_cmt;
         let content = req.body.content;
         content = content.trim();
 
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể chỉnh sửa bình luận'
             });
@@ -275,35 +275,37 @@ router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async(req, res
         let existCmt = await Comment.has(idCmt);
         let existPost = await Post.has(idPost);
         let id_commenter = await Comment.selectAccountComment(idCmt);
-        if(!existPost){
+        if (!existPost) {
             return res.status(404).json({
                 message: 'Không tìm thấy post'
             });
         }
 
-        if(!existCmt){
+        if (!existCmt) {
             return res.status(404).json({
                 message: 'Không tìm thấy comment cũ'
             });
         }
 
-        if(acc.id_account === id_commenter.id_account){
-            if(content){
-                let update = Comment.updateComment(idCmt, content);
+        if (acc.id_account === id_commenter.id_account) {
+            if (content) {
+                let update = await Comment.updateComment(idCmt, content);
+                update = await Comment.selectId(idCmt);
                 return res.status(200).json({
                     message: 'Thay đôi thành công',
+                    data: update
                 });
-            }else{
+            } else {
                 res.status(400).json({
                     message: "Không có dữ liệu"
                 });
             }
-        }else{
+        } else {
             return res.status(401).json({
                 message: "Không phải chính chủ, không được đổi cmt",
             });
         }
-    }catch(error){
+    } catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
@@ -319,11 +321,11 @@ router.put('/:id_post/comment/:id_cmt/update', Auth.authenGTUser, async(req, res
  *              403: Tài khoản này bị khóa
  *              404: Không tìm thấy post hoặc bình luận
  */
-router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
         let idCmt = req.params.id_cmt;
-        if (acc.status != 0) {
+        if (acc.account_status != 0) {
             return res.status(403).json({
                 message: 'Tài khoản đã bị khóa, không thể xóa bình luận'
             });
@@ -332,24 +334,24 @@ router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async(req, 
         let existCmt = await Comment.has(idCmt);
         let commenter = await Comment.selectAccountComment(idCmt);
 
-        if(!existCmt){
+        if (!existCmt) {
             return res.status(404).json({
                 message: 'Không tìm thấy comment cũ'
             });
         }
 
-        if(acc.id_account === commenter.id_account || acc.id_role==1){
+        if (acc.id_account === commenter.id_account || acc.id_role == 1) {
             Comment.delete(idCmt);
             Comment.deleteParent(idCmt);
             return res.status(200).json({
-                message:'Xóa thành công'
+                message: 'Xóa thành công'
             });
-        }else{
+        } else {
             return res.status(401).json({
                 message: "Bạn không có quyển xóa bình luận này"
             });
         }
-    }catch(error){
+    } catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
@@ -368,8 +370,8 @@ router.delete('/:id_post/comment/:id_cmt/delete', Auth.authenGTUser, async(req, 
  *              401: Tài khoản không có quyền thực hiện
  *              404: Không tìm thấy post hoặc bình luận
  */
-router.put('/:id_post/comment/:id_cmt/status/:new_status', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.put('/:id_post/comment/:id_cmt/status/:new_status', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let idCmt = req.params.id_cmt;
         let newStatus = req.params.new_status;
         let acc = await Account.selectId(Auth.tokenData(req).id_account);
@@ -378,29 +380,30 @@ router.put('/:id_post/comment/:id_cmt/status/:new_status', Auth.authenGTUser, as
         idPost = idPost.id_post;
         let poster = await Post.selectAccountPostId(idPost);
 
-        if(!isCommenter){
+        if (!isCommenter) {
             return res.status(404).json({
                 message: 'Không tìm thấy comment này'
             });
         }
 
-        if(acc !== poster.id_account){
-            if(acc.id_role != 1){
+        if (acc !== poster.id_account) {
+            if (acc.id_role === 3) {
                 return res.status(401).json({
                     message: 'Bạn không có quyền này'
                 });
             }
         }
 
-        if(newStatus){
-            if(newStatus!=0 && newStatus != 1){
+        if (newStatus) {
+            if (newStatus != 0 && newStatus != 1) {
                 return res.status(400).json({
                     message: 'Trạng thái không hợp lệ'
                 });
             }
 
-            else{
+            else {
                 let change = await Comment.changeStatus(idCmt, newStatus);
+                change = await Comment.selectId(idCmt);
                 return res.status(200).json({
                     message: 'Thay đổi thành công',
                     data: change
@@ -408,7 +411,7 @@ router.put('/:id_post/comment/:id_cmt/status/:new_status', Auth.authenGTUser, as
             }
         }
 
-    }catch(error){
+    } catch (error) {
         console.log(error);
         res.sendStatus(500);
     }

@@ -35,15 +35,37 @@ db.hasByUsername = (account_name) => {
     })
 }
 
+db.hasEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT * FROM account WHERE email = $1",
+            [email],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount > 0);
+            })
+    })
+}
+
+db.selectAllId = () => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select id_account from account`,
+            [],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows);
+            })
+    });
+}
+
 db.selectAll = () => {
     return new Promise((resolve, reject) => {
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status, r.name as role, 
-                (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
-                (select count(*) from post p where p.id_account = a.id_account) as num_posts,
-                (select count(*) from vote v where v.id_account = a.id_account and v.type = 1) as reputation,
-                false as status
-            from account a join role r on r.id_role=a.id_role
-            order by a.id_account asc`,
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
+        (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
+        (select count(*) from post p where p.id_account = a.id_account) as num_posts,
+        (select count(*) from vote v inner join post p on p.id_post=v.id_post where p.id_account=a.id_account and v.type=1) as reputation,
+        false as status
+    from account a join role r on r.id_role=a.id_role
+    order by a.id_account asc`,
             [],
             (err, result) => {
                 if (err) return reject(err);
@@ -54,10 +76,10 @@ db.selectAll = () => {
 
 db.selectAllByAccount = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status, r.name as role, 
+        pool.query(`select a.id_account, a.real_name, a.account_name, a.email, a.avatar, a.birth, a.gender, a.company, a.phone, a.status as account_status, r.id_role as id_role, r.name as role, 
                 (select count(*) from follow_account fa where fa.id_follower=a.id_account) as num_followers, 
-                (select count(*) from post p where p.id_account = a.id_account) as num_posts,
-                (select count(*) from vote v where v.id_account = a.id_account and v.type = 1) as reputation,
+                (select count(*) from post p where p.id_account = a.id_account and p.access=1 and p.status=1) as num_posts,
+                (select count(*) from vote v inner join post p on p.id_post=v.id_post where p.id_account=a.id_account and v.type=1) as reputation,
                 (select count(*) > 0 from follow_account fa where fa.id_follower=a.id_account and fa.id_following = $1) as status
             from account a join role r on r.id_role=a.id_role
             order by a.id_account asc`,
@@ -102,17 +124,73 @@ db.has = (id) => {
     })
 }
 
+db.checkPassword = (id_account, pass) => {
+    return new Promise((resolve, reject) => {
+        pool.query("SELECT account_name FROM account WHERE id_account=$1 and password=$2",
+            [id_account, pass],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rowCount > 0)
+            })
+    })
+}
+
 db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT A.id_account, A.id_role, 
-            R.name role_name, A.real_name, A.email, 
-            A.avatar, A.company, A.phone, A.status,
-            TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
-            TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date
-            FROM account A
-            INNER JOIN role R ON A.id_role=R.id_role
-            WHERE A.id_account=$1`,
+        R.id_role as id_role, R.name as role, A.account_name, A.real_name, A.email, A.gender,
+        A.avatar, A.company, A.phone, A.status as account_status,
+        TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
+        TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
+        (select count(*) from post P where A.id_account=P.id_account and P.status=1 and P.access=1) AS total_post,
+		(select count(*) from follow_tag FT where FT.id_account=A.id_account) AS total_tag_follow,
+        (select count(*) from follow_account FA where A.id_account=FA.id_follower) as total_follower,
+		(select count(*) from follow_account FA where A.id_account=FA.id_following) as total_following,
+		(select sum(view) from post P where P.id_account=A.id_account) as total_view,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=1
+            group by P.id_post) as CV) as total_vote_up,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=0
+            group by P.id_post) as CV) as total_vote_down
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$1`,
             [id],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0]);
+            })
+    })
+}
+
+db.selectIdStatus = (idAccount, idUser) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT A.id_account, A.id_role, 
+        R.id_role as id_role, R.name as role, A.account_name, A.real_name, A.email, A.gender,
+        A.avatar, A.company, A.phone, A.status as account_status,
+        TO_CHAR(A.birth:: date, 'dd/mm/yyyy') AS birth,
+        TO_CHAR(A.create_date:: date, 'dd/mm/yyyy') AS create_date,
+        (select exists(select * from follow_account where id_follower=$1 and id_following=$2)) as status,
+		(select count(*) from post P where A.id_account=P.id_account and P.status=1 and P.access=1) AS total_post,
+		(select count(*) from follow_tag FT where FT.id_account=A.id_account) AS total_tag_follow,
+        (select count(*) from follow_account FA where A.id_account=FA.id_follower) as total_follower,
+		(select count(*) from follow_account FA where A.id_account=FA.id_following) as total_following,
+		(select sum(view) from post P where P.id_account=A.id_account) as total_view,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=1
+            group by P.id_post) as CV) as total_vote_up,
+        (select sum(count_vote) from (select count(V.id_post) as count_vote
+            from post P, vote V 
+            where P.id_account=$1 and V.id_post=P.id_post and V.type=0
+            group by P.id_post) as CV) as total_vote_down
+        FROM account A
+        INNER JOIN role R ON A.id_role=R.id_role
+        WHERE A.id_account=$1`,
+            [idAccount, idUser],
             (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0]);

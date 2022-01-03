@@ -56,7 +56,7 @@ router.post('/login', async (req, res, next) => {
             let acc = await Account.selectByUsername(username);
             let match = await bcrypt.compare(password, acc.password);
 
-            if (acc.status == 1) {
+            if (acc.account_status == 1) {
                 let valid = await LockAccount.check(acc.id_account);
                 if (valid) {
                     Account.updateStatus(acc.id_account, 0);
@@ -68,7 +68,7 @@ router.post('/login', async (req, res, next) => {
                     "id_account": acc.id_account,
                     "id_role": acc.id_role,
                     "account_name": acc.account_name,
-                    "status": acc.status,
+                    "account_status": acc.account_status,
                 }
                 let days_token = await Information.selectToken();
                 const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
@@ -278,7 +278,7 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next) => {
         let acc_boss = await Account.selectId(id_account_boss);
         let acc_lock = await Account.selectId(id_account_lock);
 
-        if (acc_boss.status != 0 || acc_boss.id_role >= acc_lock.id_role) {
+        if (acc_boss.account_status != 0 || acc_boss.id_role >= acc_lock.id_role) {
             return res.status(403).json({
                 message: 'Tài khoản không có quyền thực hiện',
             });
@@ -290,7 +290,7 @@ router.post('/:id/ban', Auth.authenGTModer, async (req, res, next) => {
             });
         }
 
-        if (acc_lock.status != 0) {
+        if (acc_lock.account_status != 0) {
             return res.status(202).json({
                 message: 'Tài khoản này đã bị khóa'
             })
@@ -407,18 +407,27 @@ router.post('/:id/confirm', async (req, res, next) => {
         let verify = await Verification.selectCode(id_account);
         let match = await bcrypt.compare(code, verify);
         if (match) {
+            bcrypt.hash("123456", saltRounds, async (err, hash) => {
+                let new_password = hash;
+                let changePassword = await Account.updatePassword(id_account, new_password);
+
+                // return res.status(201).json({
+                //     message: 'Thay đổi mật khẩu thành công',
+                // })
+            });
+
             let acc = await Account.selectId(id_account);
             var data = {
                 "id_account": acc.id_account,
                 "id_role": acc.id_role,
                 "account_name": acc.account_name,
-                "status": acc.status,
+                "account_status": acc.account_status,
             }
             let days_token = await Information.selectToken();
             const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${days_token}d` });
 
             return res.status(200).json({
-                message: 'đăng nhập thành công',
+                message: 'đăng nhập thành công, mật khẩu reset 123456',
                 accessToken: accessToken,
                 data: data
             });
@@ -432,6 +441,62 @@ router.post('/:id/confirm', async (req, res, next) => {
         return res.sendStatus(500);
     }
 })
+
+/**
+ * Đổi password của cá nhân
+ * @params      id: để chơi, không dùng đến (để 1 số bất kỳ thì nó cũng hoạt động dc)
+ * 
+ * @body        
+ * 
+ * @permisson   Ai cũng có thể thực thi
+ * 
+ * @return      201: Đổi thành công
+ *              400: Mật khẩu mới chưa được nhập
+ */
+router.put('/:id/change_password', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let new_password = req.body.new_password;
+        let old_password = req.body.old_password;
+        let id_account = Auth.tokenData(req).id_account;
+
+        if (old_password !== "") {
+            let acc = await Account.selectId(id_account);
+            acc = await Account.selectByUsername(acc.account_name);
+            let match = await bcrypt.compare(old_password, acc.password);
+
+            if (match) {
+                if (new_password !== "") {
+                    bcrypt.hash(new_password, saltRounds, async (err, hash) => {
+                        new_password = hash;
+                        let changePassword = await Account.updatePassword(id_account, new_password);
+
+                        return res.status(201).json({
+                            message: 'Thay đổi mật khẩu thành công',
+                        })
+                    });
+                } else {
+                    return res.status(400).json({
+                        message: 'Thiếu thông tin'
+                    });
+                }
+            } else {
+                return res.status(403).json({
+                    message: 'Mật khẩu cũ không chính xác!'
+                })
+
+            }
+
+        } else {
+            return res.status(400).json({
+                message: 'Thiếu mật khẩu cũ!'
+            })
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
 
 /**
  * Thêm 1 tài khoản thường
@@ -452,6 +517,21 @@ router.post('/', async (req, res, next) => {
                     console.log(err);
                     return res.sendStatus(500);
                 }
+
+                let accountNameExists = await Account.hasByUsername(account_name);
+                if(accountNameExists){
+                    return res.status(400).json({
+                        message: 'Tên tài khoản đã tồn tại!'
+                    })
+                }
+
+                let emailExists = await Account.hasEmail(email);
+                if(emailExists){
+                    return res.status(400).json({
+                        message: 'Email này đã được sử dụng!'
+                    })
+                }
+
                 let avatar = await Information.selectAvatar();
                 let acc = { account_name, real_name, email, password, id_role, avatar };
                 let insertId = await Account.add(acc);
@@ -475,6 +555,102 @@ router.post('/', async (req, res, next) => {
     }
 
 });
+
+/**
+ * Thay đổi thông tin tài khoản, chỉ có thể đổi của chính bản thân
+ * 
+ * @permission  phải đăng nhập thì mới được thực thi (user trở lên)
+ * @return      401: Không được sửa thông tin của người khác
+ *              400: Thiếu thông tin bắt buộc
+ *              200: Cập nhật thành công, trả về tài khoản vừa cập nhật
+ */
+router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let updateId = req.params.id;
+        let userId = Auth.tokenData(req).id_account;
+
+        if (updateId != userId) {
+            return res.status(401).json({
+                message: 'Không thể sửa đổi thông tin của người khác'
+            })
+        }
+
+        if (!req.body.real_name) {
+            res.status(400).json({
+                message: 'real_name là bắt buộc'
+            })
+        }
+
+        let birth = null;
+
+        if(req.body.birth === null || req.body.birth === ''){
+            birth = null;
+        }else{
+            let date = checkDate(req.body.birth)
+            if (date === false) {
+                return res.status(400).json({
+                    message: 'Ngày sinh không hợp lệ'
+                })
+            } else {
+                birth = date;
+            }
+        }
+
+        var account = {
+            'real_name': req.body.real_name ?? '',
+            'birth': birth,
+            'gender': req.body.gender ?? 0,
+            'company': req.body.company ?? '',
+            'phone': req.body.phone ?? '',
+            'avatar': req.body.avatar ?? '',
+        }
+
+        let result = await Account.update(updateId, account);
+
+        res.status(200).json({
+            message: 'Cập nhật thông tin tài khoản thành công',
+            data: result
+        })
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({
+            message: 'Something wrong'
+        })
+    }
+
+})
+
+function checkDate(date) {
+    let arr = date.split('/');
+
+    let day = parseInt(arr[0]);
+    let month = parseInt(arr[1]);
+    let year = parseInt(arr[2]);
+
+    if (checkMonth(month) && day > 0 && day <= lastDayOfMonth(day, month, year)) {
+        return month + '/' + day + '/' + year;
+    }
+    return false;
+}
+
+function lastDayOfMonth(day, month, year) {
+    if (month == 2) {
+        if (isLeapYear(year)) return 29;
+        return 28;
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+        return 30;
+    }
+    return 31;
+}
+
+function checkMonth(month) {
+    return month > 0 && month <= 12;
+}
+
+function isLeapYear(year) {
+    if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)) return true;
+    return false;
+}
 
 /**
  * Lấy thông tin của tài khoản
@@ -550,14 +726,37 @@ router.get('/:id_account/avatar', async (req, res, next) => {
  */
 router.get('/all', async (req, res, next) => {
     try {
-        // let acc = await Account.selectId(Auth.tokenData(req).id_account);
-        // if (acc.status != 0) {
-        //     return res.status(400).json({
-        //         message: 'Tài khoản đang bị khóa'
-        //     })
-        // } else {
-        var list = await Account.selectAll();
+        const authorizationHeader = req.headers['authorization'];
 
+        let list = [];
+        let ids = await Account.selectAllId();
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(403);
+                }
+            })
+
+            let idUser = Auth.tokenData(req).id_account;
+
+            for (let accId of ids) {
+                let acc = await Account.selectIdStatus(accId.id_account, idUser);
+                list.push(acc)
+            }
+
+            // let acc = await Account.selectId(Auth.tokenData(req).id_account);
+            // list = await Account.selectAllByAccount(acc.id_account);
+        } else {
+            for (let accId of ids) {
+                let acc = await Account.selectId(accId.id_account);
+                list.push(acc)
+            }
+        }
         return res.status(200).json({
             message: 'Lấy danh sách tài khoản thành công',
             data: list
@@ -654,6 +853,41 @@ router.get('/:id', async (req, res, next) => {
 })
 
 /**
+ * Lấy thông tin 1 tài khoản theo id, có status
+ * 
+ * @permission  không cần
+ * 
+ * @return      200: trả về tài khoản tìm thấy
+ *              404: Không tìm thấy
+ */
+router.get('/:id/status/:id_user', async (req, res, next) => {
+    try {
+        let idUser = req.params.id_user;
+        let id = req.params.id;
+        let accountExists = await Account.has(id);
+
+        if (accountExists) {
+            let result = await Account.selectIdStatus(id, idUser);
+
+            res.status(200).json({
+                message: 'Đã tìm thấy tài khoản',
+                data: result
+            })
+        } else {
+            res.status(404).json({
+                message: 'Không tìm thây tài khoản',
+            })
+        }
+
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            message: 'Something wrong!'
+        })
+    }
+})
+
+/**
  * Lấy thông tin chức vụ của 1 tài khoản theo id
  * @permission  Ai cũng có thể thực thi
  * @return      200: trả về chức vụ của tài khoản cần tìm
@@ -718,16 +952,28 @@ router.get('/:id/posts', async (req, res, next) => {
  * @return      200: Thành công, trả về số lượng + id các bài viết đã bookmark của tài khoản này
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/bookmarks', Auth.authenGTUser, async (req, res, next) => {
+router.get('/:id/bookmarks', async (req, res, next) => {
     try {
         let id = req.params.id;
 
         let accExists = await Account.has(id);
         if (accExists) {
-            let result = await Bookmark.list(id);
+            let postsId = await Bookmark.list(id);
+            let data = [];
+            for (let i = 0; i < postsId.length; i++) {
+                let post = await Post.selectId(postsId[i].id_post);
+                let acc = await Account.selectId(post.id_account);
+                let tags = await Post.selectTagsOfPost(postsId[i].id_post);
+                data.push({
+                    post: post,
+                    author: acc,
+                    tags: tags
+                });
+            }
+
             res.status(200).json({
-                message: 'Lấy danh sách bookmark thành công',
-                data: result
+                message: 'Lấy danh sách bài viết nháp thành công',
+                data: data
             })
         } else {
             res.status(404).json({
@@ -781,13 +1027,38 @@ router.get('/:id/following', async (req, res, next) => {
     try {
         let id = req.params.id;
 
+        const authorizationHeader = req.headers['authorization'];
+
+        let idUser = false;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(401);
+                }
+            })
+
+            idUser = Auth.tokenData(req).id_account;
+        }
+
         let accExists = await Account.has(id);
         if (accExists) {
             let result = await FollowAccount.listFollowingOf(id);
+            let data = [];
+            for (let accFollowing of result) {
+                let acc;
+                if (idUser === false) acc = await Account.selectId(accFollowing.id_following);
+                else acc = await Account.selectIdStatus(accFollowing.id_following, idUser);
+                data.push(acc)
+            }
 
             res.status(200).json({
                 message: 'Lấy danh sách các tài khoản theo dõi người này thành công',
-                data: result
+                data: data
             })
         } else {
             res.status(404).json({
@@ -811,13 +1082,38 @@ router.get('/:id/follower', async (req, res, next) => {
     try {
         let id = req.params.id;
 
+        const authorizationHeader = req.headers['authorization'];
+
+        let idUser = false;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(401);
+                }
+            })
+
+            idUser = Auth.tokenData(req).id_account;
+        }
+
         let accExists = await Account.has(id);
         if (accExists) {
             let result = await FollowAccount.listFollowerOf(id);
+            let data = [];
+            for (let accFollowing of result) {
+                let acc;
+                if (idUser === false) acc = await Account.selectId(accFollowing.id_follower);
+                else acc = await Account.selectIdStatus(accFollowing.id_follower, idUser);
+                data.push(acc)
+            }
 
             res.status(200).json({
-                message: 'Lấy danh sách các tài khoản mà người này theo dõi thành công',
-                data: result
+                message: 'Lấy danh sách các tài khoản theo dõi người này thành công',
+                data: data
             })
         } else {
             res.status(404).json({
@@ -963,9 +1259,12 @@ router.put('/change/information', Auth.authenGTUser, async (req, res, next) => {
             })
         }
 
+        let birth = null;
+        if(req.body.birth !== '') birth = req.body.birth;
+
         var account = {
             'real_name': req.body.real_name ?? '',
-            'birth': req.body.birth ?? '',
+            'birth': birth,
             'gender': req.body.gender ?? 0,
             'company': req.body.company ?? '',
             'phone': req.body.phone ?? '',
@@ -1011,7 +1310,7 @@ router.patch('/:id/unlock', Auth.authenGTModer, async (req, res, next) => {
     let acc_boss = await Account.selectId(id_account_boss);
     let acc_lock = await Account.selectId(id_account_lock);
 
-    if (acc_boss.status != 0 || acc_boss.id_role >= acc_lock.id_role || acc_lock.status == 2) {
+    if (acc_boss.account_status != 0 || acc_boss.id_role >= acc_lock.id_role || acc_lock.account_status == 2) {
         return res.status(403).json({
             message: 'Tài khoản không có quyền thực hiện'
         });

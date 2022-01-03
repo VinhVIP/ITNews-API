@@ -38,7 +38,7 @@ db.list = (id_account) => {
         FROM post P
         INNER JOIN bookmark B
         ON P.id_post=B.id_post
-        WHERE B.id_account=$1`,
+        WHERE B.id_account=$1 order by P.created desc`,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);

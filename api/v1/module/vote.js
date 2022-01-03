@@ -67,7 +67,7 @@ db.update = (id_account, id_post, type) => {
 
 db.getUpVotes = (id_post) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=0",
+        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=1",
             [id_post], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
@@ -77,7 +77,7 @@ db.getUpVotes = (id_post) => {
 
 db.getDownVotes = (id_post) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=1",
+        pool.query("SELECT * FROM vote WHERE id_post=$1 AND type=0",
             [id_post], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows);
@@ -87,7 +87,8 @@ db.getDownVotes = (id_post) => {
 
 db.getTotalVoteUp = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT COUNT(*) FROM vote WHERE id_account=$1 AND type=0",
+        pool.query(`select count(*) from vote V, post P
+        where P.id_account=$1 and V.id_post=P.id_post and V.type=1`,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0].count);
@@ -97,7 +98,8 @@ db.getTotalVoteUp = (id_account) => {
 
 db.getTotalVoteDown = (id_account) => {
     return new Promise((resolve, reject) => {
-        pool.query("SELECT COUNT(*) FROM vote WHERE id_account=$1 AND type=1",
+        pool.query(`select count(*) from vote V, post P
+        where P.id_account=$1 and V.id_post=P.id_post and V.type=0`,
             [id_account], (err, result) => {
                 if (err) return reject(err);
                 return resolve(result.rows[0].count);

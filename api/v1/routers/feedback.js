@@ -9,12 +9,12 @@ const Auth = require('../../../auth');
  * @params        id_feedback
  * @returns     202, 412
  */
-router.get('/information/:id_feedback', Auth.authenAdmin, async(req, res, next)=>{
-    try{
+router.get('/information/:id_feedback', Auth.authenAdmin, async (req, res, next) => {
+    try {
         let id_feedback = req.params.id_feedback;
 
         let exist = await Feedback.has(id_feedback);
-        if(!exist){
+        if (!exist) {
             return res.status(400).json({
                 message: "không có phản hồi này"
             })
@@ -22,13 +22,33 @@ router.get('/information/:id_feedback', Auth.authenAdmin, async(req, res, next)=
 
         let read = await Feedback.updateRead(id_feedback);
         let data = await Feedback.selectID(id_feedback);
-            
-        return res.json({
+
+        return res.status(200).json({
             message: "thao tác thành công",
             data: data
         })
 
-    }catch(err){
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy tất cả feedback chưa đọc
+ * @permission  admin
+ */
+router.get('/unread', Auth.authenAdmin, async (req, res, next) => {
+    try {
+        let data = [];
+        data = await Feedback.selectUnread();
+
+        return res.status(200).json({
+            message: "thao tác thành công",
+            data: data
+        })
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
@@ -37,39 +57,17 @@ router.get('/information/:id_feedback', Auth.authenAdmin, async(req, res, next)=
 /**
  * Lấy tất cả feedback
  * @permission  admin
- * @query        is_unread, page, num_rows
- 
  */
-router.get('/all', Auth.authenAdmin, async(req, res, next)=>{
-    try{
-        let is_unread = req.query.is_read;
-        let page = req.query.page;
-        let num_rows = req.query.num_rows;
+ router.get('/all', Auth.authenAdmin, async (req, res, next) => {
+    try {
         let data = [];
+        data = await Feedback.selectAll();
 
-        if(!is_unread){
-            is_unread = 0;
-        }
-
-        if(!page){
-            page = 1;
-        }
-
-        if(!num_rows){
-            num_rows = 10;
-        }
-
-        if(is_unread == 0){
-            data = await Feedback.selectAll(page, num_rows);
-        }else{
-            data = await Feedback.selectUnread(page, num_rows);
-        }
-        
-        return res.json({
+        return res.status(200).json({
             message: "thao tác thành công",
             data: data
         })
-    }catch(err){
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
@@ -81,17 +79,17 @@ router.get('/all', Auth.authenAdmin, async(req, res, next)=>{
  * @query       is_unread
 
  */
-router.get('/all/amount', Auth.authenAdmin, async(req, res, next)=>{
-    try{
+router.get('/all/amount', Auth.authenAdmin, async (req, res, next) => {
+    try {
         let is_unread = req.query.is_unread;
         let amount;
-        if(!is_unread){
+        if (!is_unread) {
             is_unread = 0;
         }
 
-        if(is_unread == 0){
+        if (is_unread == 0) {
             amount = await Feedback.selectAmountAll();
-        }else{
+        } else {
             amount = await Feedback.selectAmountUnread();
         }
 
@@ -99,7 +97,7 @@ router.get('/all/amount', Auth.authenAdmin, async(req, res, next)=>{
             message: "thao tác thành công, trả về số lượng",
             amount: amount
         })
-    }catch(err){
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
@@ -111,21 +109,21 @@ router.get('/all/amount', Auth.authenAdmin, async(req, res, next)=>{
  * @params       id_feedback 
 
  */
-router.delete('/:id_feedback', Auth.authenAdmin, async(req, res, next)=>{
-    try{
+router.delete('/:id_feedback', Auth.authenAdmin, async (req, res, next) => {
+    try {
         let id_feedback = req.params.id_feedback;
         let exist = await Feedback.has(id_feedback);
-        if(!exist){
+        if (!exist) {
             return res.status(404).json({
                 message: "không có phản hồi này"
             })
-        }else{
+        } else {
             let deleted = await Feedback.delete(id_feedback);
-            return res.json({
+            return res.status(200).json({
                 message: "Thao tác thành công"
             })
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
@@ -136,22 +134,103 @@ router.delete('/:id_feedback', Auth.authenAdmin, async(req, res, next)=>{
  * @body       subject, content
  * @returns     200, 400
  */
-router.post('/', Auth.authenGTUser, async(req, res, next)=>{
-    try{
+router.post('/', Auth.authenGTUser, async (req, res, next) => {
+    try {
         let id_account = Auth.tokenData(req).id_account;
         let subject = req.body.subject;
         let content = req.body.content;
-        if(subject && content){
+        if (subject && content) {
             let add = await Feedback.add(id_account, subject, content);
             return res.status(201).json({
                 message: "Thêm phản hồi thành công"
             })
-        }else{
+        } else {
             return res.status(400).json({
                 message: "Thiếu body"
             })
         }
-    }catch(err){
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Đánh dấu đã đọc phản hồi
+ * 
+ * @permission Admin
+ */
+router.put('/:id_feedback/read', Auth.authenAdmin, async (req, res, next) =>{
+    try {
+        let id_feedback = req.params.id_feedback;
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(404).json({
+                message: "không có phản hồi này"
+            })
+        } else {
+            await Feedback.updateRead(id_feedback);
+            return res.status(200).json({
+                message: "Đánh dấu đã đọc phản hồi thành công!"
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+/**
+ * Đánh dấu chưa đọc phản hồi
+ * 
+ * @permission Admin
+ */
+ router.put('/:id_feedback/unread', Auth.authenAdmin, async (req, res, next) =>{
+    try {
+        let id_feedback = req.params.id_feedback;
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(404).json({
+                message: "không có phản hồi này"
+            })
+        } else {
+            await Feedback.updateUnRead(id_feedback);
+            return res.status(200).json({
+                message: "Đánh dấu chưa đọc phản hồi thành công!"
+            })
+        }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Lấy 1 feedback, không đánh dấu đọc
+ * @permission      admin
+ * @params        id_feedback
+ * @returns     202, 412
+ */
+ router.get('/:id_feedback', Auth.authenAdmin, async (req, res, next) => {
+    try {
+        let id_feedback = req.params.id_feedback;
+
+        let exist = await Feedback.has(id_feedback);
+        if (!exist) {
+            return res.status(400).json({
+                message: "không có phản hồi này"
+            })
+        }
+
+        let data = await Feedback.selectID(id_feedback);
+
+        return res.status(200).json({
+            message: "thao tác thành công",
+            data: data
+        })
+
+    } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
