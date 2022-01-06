@@ -272,7 +272,10 @@ router.get('/newest', async (req, res, next) => {
  */
 router.get('/trending', async (req, res, next) => {
     try {
-        let postsId = await Post.getTrending();
+        let page = req.query.page;
+        let postsId;
+        if(page) postsId = await Post.getTrending(page);
+        else postsId = await Post.getTrending();
 
         let data = [];
 
@@ -310,7 +313,10 @@ router.get('/trending', async (req, res, next) => {
 router.get('/following', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id_account = Auth.tokenData(req).id_account;
-        let postsId = await Post.getFollowing(id_account);
+        let postsId;
+        let page = req.query.page;
+        if(page) postsId = await Post.getFollowing(id_account, page);
+        else postsId = await Post.getFollowing(id_account);
 
         let data = [];
 

@@ -203,20 +203,37 @@ db.deletePostTag = (id_post) => {
     })
 }
 
-db.getTrending = () => {
-    return new Promise((resolve, reject) => {
-        pool.query(`select P.id_post, count(P.id_post) rating
-        from post P, vote V 
-        where P.id_post=V.id_post 
-        group by P.id_post
-        order by rating desc`,
-            [],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
+db.getTrending = (page = 0) => {
+    if (page == 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select P.id_post, count(P.id_post) rating
+            from post P, vote V 
+            where P.id_post=V.id_post 
+            group by P.id_post
+            order by rating desc`,
+                [],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
 
-    })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select P.id_post, count(P.id_post) rating
+            from post P, vote V 
+            where P.id_post=V.id_post 
+            group by P.id_post
+            order by rating desc
+            LIMIT 10 OFFSET $1`,
+                [(page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+
+        })
+    }
 }
 
 db.getNewest = (page = 0) => {
@@ -269,30 +286,60 @@ db.getSearch = (search) => {
     })
 }
 
-db.getFollowing = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`(SELECT P.*
-            FROM post P
-            INNER JOIN post_tag PT ON P.id_post=PT.id_post
-            WHERE PT.id_tag IN (
-                SELECT FT.id_tag
-                FROM follow_tag FT
-                WHERE FT.id_account=$1
-            )
-            ORDER BY P.created DESC)
-            UNION
-            (SELECT P.*
+db.getFollowing = (id_account, page = 0) => {
+    if (page == 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`(SELECT P.*
+                FROM post P
+                INNER JOIN post_tag PT ON P.id_post=PT.id_post
+                WHERE PT.id_tag IN (
+                    SELECT FT.id_tag
+                    FROM follow_tag FT
+                    WHERE FT.id_account=$1
+                    )
+                )
+                UNION
+                (SELECT P.*
                     FROM post P
                     INNER JOIN follow_account F ON F.id_follower=P.id_account
                     WHERE F.id_following=$1 AND P.status=1 AND P.access=1 
-                    ORDER BY P.created DESC )
-            `,
-            [id_account],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
-    })
+                )
+                ORDER BY created DESC
+                `,
+                [id_account],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`(SELECT P.*
+                FROM post P
+                INNER JOIN post_tag PT ON P.id_post=PT.id_post
+                WHERE PT.id_tag IN (
+                    SELECT FT.id_tag
+                    FROM follow_tag FT
+                    WHERE FT.id_account=$1
+                    )
+                )
+                UNION
+                (SELECT P.*
+                    FROM post P
+                    INNER JOIN follow_account F ON F.id_follower=P.id_account
+                    WHERE F.id_following=$1 AND P.status=1 AND P.access=1 
+                )
+                ORDER BY created DESC
+                LIMIT 10 OFFSET $2
+                `,
+                [id_account, (page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+        })
+    }
+
 }
 
 db.getListPostIdOfAccount = (id_account) => {
