@@ -321,7 +321,7 @@ db.getFollowing = (id_account, page = 0) => {
                     SELECT FT.id_tag
                     FROM follow_tag FT
                     WHERE FT.id_account=$1
-                    )
+                    ) AND P.status=1 AND P.access=1 
                 )
                 UNION
                 (SELECT P.*
