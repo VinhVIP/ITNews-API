@@ -443,7 +443,7 @@ router.post('/:id/confirm', async (req, res, next) => {
 })
 
 /**
- * Đổi password của cá nhân
+ * Đổi password của cá nhân (bỏ đi, hãy dùng v2 phía dưới)
  * @params      id: để chơi, không dùng đến (để 1 số bất kỳ thì nó cũng hoạt động dc)
  * 
  * @body        
@@ -477,6 +477,61 @@ router.put('/:id/change_password', Auth.authenGTUser, async (req, res, next) => 
                 } else {
                     return res.status(400).json({
                         message: 'Thiếu thông tin'
+                    });
+                }
+            } else {
+                return res.status(403).json({
+                    message: 'Mật khẩu cũ không chính xác!'
+                })
+
+            }
+
+        } else {
+            return res.status(400).json({
+                message: 'Thiếu mật khẩu cũ!'
+            })
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
+
+
+/**
+ * Đổi password của cá nhân (đã chỉnh sửa - version 2)
+ * 
+ * @body        old_password, new_password
+ * @permisson   Người đang đăng nhập
+ * @return      200: Đổi thành công
+ *              400: Thiếu dữ liệu
+ *              403: Mật khẩu cũ không chính xác
+ */
+ router.put('/change/password', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let new_password = req.body.new_password;
+        let old_password = req.body.old_password;
+        let id_account = Auth.tokenData(req).id_account;
+
+        if (old_password !== "") {
+            let acc = await Account.selectId(id_account);
+            acc = await Account.selectByUsername(acc.account_name);
+            let match = await bcrypt.compare(old_password, acc.password);
+
+            if (match) {
+                if (new_password !== "") {
+                    bcrypt.hash(new_password, saltRounds, async (err, hash) => {
+                        new_password = hash;
+                        let changePassword = await Account.updatePassword(id_account, new_password);
+
+                        return res.status(200).json({
+                            message: 'Thay đổi mật khẩu thành công',
+                        })
+                    });
+                } else {
+                    return res.status(400).json({
+                        message: 'Mật khẩu mới không được bỏ trống'
                     });
                 }
             } else {
