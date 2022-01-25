@@ -344,14 +344,25 @@ db.getFollowing = (id_account, page = 0) => {
 
 }
 
-db.getListPostIdOfAccount = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC",
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
+db.getListPostIdOfAccount = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC",
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC LIMIT 10 OFFSET $2",
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
 }
 
 db.getDraftPosts = (id_account) => {

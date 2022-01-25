@@ -508,7 +508,7 @@ router.put('/:id/change_password', Auth.authenGTUser, async (req, res, next) => 
  *              400: Thiếu dữ liệu
  *              403: Mật khẩu cũ không chính xác
  */
- router.put('/change/password', Auth.authenGTUser, async (req, res, next) => {
+router.put('/change/password', Auth.authenGTUser, async (req, res, next) => {
     try {
         let new_password = req.body.new_password;
         let old_password = req.body.old_password;
@@ -574,14 +574,14 @@ router.post('/', async (req, res, next) => {
                 }
 
                 let accountNameExists = await Account.hasByUsername(account_name);
-                if(accountNameExists){
+                if (accountNameExists) {
                     return res.status(400).json({
                         message: 'Tên tài khoản đã tồn tại!'
                     })
                 }
 
                 let emailExists = await Account.hasEmail(email);
-                if(emailExists){
+                if (emailExists) {
                     return res.status(400).json({
                         message: 'Email này đã được sử dụng!'
                     })
@@ -638,9 +638,9 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
 
         let birth = null;
 
-        if(req.body.birth === null || req.body.birth === ''){
+        if (req.body.birth === null || req.body.birth === '') {
             birth = null;
-        }else{
+        } else {
             let date = checkDate(req.body.birth)
             if (date === false) {
                 return res.status(400).json({
@@ -777,14 +777,18 @@ router.get('/:id_account/avatar', async (req, res, next) => {
 /**
  * Lấy danh sách tất cả tài khoản
  * 
- * @permission Chỉ Moder trở lên mới được thực thi
+ * @permission 
  */
 router.get('/all', async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         const authorizationHeader = req.headers['authorization'];
 
         let list = [];
-        let ids = await Account.selectAllId();
+        let ids;
+        if(page) ids = await Account.selectAllId(page);
+        else ids = await Account.selectAllId();
 
         if (authorizationHeader) {
             const token = authorizationHeader.split(' ')[1];
@@ -980,13 +984,21 @@ router.get('/:id/role', async (req, res, next) => {
 router.get('/:id/posts', async (req, res, next) => {
     try {
         let idAcc = req.params.id;
-        let postsId = await Post.getListPostIdOfAccount(idAcc);
+        let page = req.query.page;
+
+        let acc = await Account.selectId(idAcc);
+
+        let postsId;
+        if (page) postsId = await Post.getListPostIdOfAccount(idAcc, page);
+        else postsId = await Post.getListPostIdOfAccount(idAcc);
+
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
             });
         }
@@ -1315,7 +1327,7 @@ router.put('/change/information', Auth.authenGTUser, async (req, res, next) => {
         }
 
         let birth = null;
-        if(req.body.birth !== '') birth = req.body.birth;
+        if (req.body.birth !== '') birth = req.body.birth;
 
         var account = {
             'real_name': req.body.real_name ?? '',

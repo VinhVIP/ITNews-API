@@ -46,15 +46,27 @@ db.hasEmail = (email) => {
     })
 }
 
-db.selectAllId = () => {
-    return new Promise((resolve, reject) => {
-        pool.query(`select id_account from account`,
-            [],
-            (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    });
+db.selectAllId = (page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_account from account order by id_account desc`,
+                [],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_account from account order by id_account desc LIMIT 10 OFFSET $1`,
+                [(page - 1) * 10],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    }
+
 }
 
 db.selectAll = () => {
