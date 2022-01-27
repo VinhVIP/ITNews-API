@@ -1090,7 +1090,7 @@ router.get('/:id/follow_tag', async (req, res, next) => {
  * @return      200: Thành công, trả về danh sách tài khoản 
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/following', async (req, res, next) => {
+router.get('/:id/follower', async (req, res, next) => {
     try {
         let id = req.params.id;
 
@@ -1145,7 +1145,7 @@ router.get('/:id/following', async (req, res, next) => {
  * @return      200: Thành công, trả về danh sách tài khoản 
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/follower', async (req, res, next) => {
+router.get('/:id/following', async (req, res, next) => {
     try {
         let id = req.params.id;
 
