@@ -787,7 +787,7 @@ router.get('/all', async (req, res, next) => {
 
         let list = [];
         let ids;
-        if(page) ids = await Account.selectAllId(page);
+        if (page) ids = await Account.selectAllId(page);
         else ids = await Account.selectAllId();
 
         if (authorizationHeader) {
@@ -1064,9 +1064,29 @@ router.get('/:id/follow_tag', async (req, res, next) => {
     try {
         let id = req.params.id;
 
+        const authorizationHeader = req.headers['authorization'];
+
+        let idUser = false;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(401);
+                }
+            })
+
+            idUser = Auth.tokenData(req).id_account;
+        }
+
         let accExists = await Account.has(id);
         if (accExists) {
-            let result = await FollowTag.list(id);
+            let result;
+            if (idUser === false) result = await FollowTag.list(id);
+            else result = await FollowTag.listStatus(id, idUser);
 
             res.status(200).json({
                 message: 'Lấy danh sách các thẻ mà tài khoản theo dõi thành công',
@@ -1078,7 +1098,6 @@ router.get('/:id/follow_tag', async (req, res, next) => {
             })
         }
     } catch (error) {
-        console.log(error);
         res.sendStatus(500);
     }
 })
