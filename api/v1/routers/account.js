@@ -1043,10 +1043,14 @@ router.get('/:id/posts', async (req, res, next) => {
 router.get('/:id/bookmarks', async (req, res, next) => {
     try {
         let id = req.params.id;
+        let page = req.query.page;
 
         let accExists = await Account.has(id);
         if (accExists) {
-            let postsId = await Bookmark.list(id);
+            let postsId;
+            if (page) postsId = await Bookmark.list(id, page);
+            else postsId = await Bookmark.list(id);
+            
             let data = [];
             for (let i = 0; i < postsId.length; i++) {
                 let post = await Post.selectId(postsId[i].id_post);

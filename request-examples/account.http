@@ -67,8 +67,8 @@ GET http://localhost:8000/api/v1/account/60/posts?page=2
 
 
 ### Lấy danh sách các bookmark
-GET http://localhost:8000/api/v1/account/1/bookmarks
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI0MjA1LCJleHAiOjE2MzA3Mjc4MDV9.jhYPQzcNO1L2FJJ-elPBW1K8o6EBT_gaLJupX0WClaQ
+GET http://localhost:8000/api/v1/account/1/bookmarks?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjE4NTcwLCJleHAiOjE2NDYyOTIxNzB9.8JrgfG1Y7UkNnZ-SjbgG0VtVsb74fKtegaQBbiTfr5k
 
 
 ### Lấy danh sách các tag đang follow
