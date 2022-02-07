@@ -27,13 +27,15 @@ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
         else postsId = await Post.getDraftPosts(accId);
 
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
@@ -64,13 +66,15 @@ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
         else postsId = await Post.getPublicPosts(accId);
 
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
@@ -101,13 +105,15 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
         else postsId = await Post.getUnlistedPosts(accId);
 
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
