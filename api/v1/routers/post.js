@@ -9,6 +9,7 @@ var Account = require('../module/account');
 var Vote = require('../module/vote');
 var Notification = require('../module/notification');
 var FollowAccount = require('../module/follow_account');
+var Bookmark = require('../module/bookmark');
 
 
 /**
@@ -119,6 +120,44 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
 
         res.status(200).json({
             message: 'Lấy danh sách bài viết nháp thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tất cả các bài viết bản thân đã bookmark
+ * 
+ * @permission  Đăng nhập mới được thực hiện
+ * @return      200: Thành công, trả về danh sách bài viết
+ */
+router.get('/bookmark', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let page = req.query.page;
+
+        let accId = Auth.tokenData(req).id_account;
+        let postsId;
+        if (page) postsId = await Bookmark.list(accId, page);
+        else postsId = await Bookmark.list(accId);
+
+        let data = [];
+        let acc = await Account.selectId(accId);
+
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectId(postsId[i].id_post);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết bookmark thành công',
             data: data
         })
     } catch (error) {
