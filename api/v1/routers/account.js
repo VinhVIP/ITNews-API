@@ -22,6 +22,7 @@ const Information = require('../module/information');
 
 var Auth = require('../../../auth');
 const e = require('express');
+const { selectIdStatus } = require('../module/account');
 const storage = multer.diskStorage({
     destination: './uploads',
     filename: function (req, file, cb) {
@@ -891,7 +892,27 @@ router.get('/:id', async (req, res, next) => {
         let accountExists = await Account.has(id);
 
         if (accountExists) {
-            let result = await Account.selectId(id);
+
+            const authorizationHeader = req.headers['authorization'];
+            let idUser = false;
+
+            if (authorizationHeader) {
+                const token = authorizationHeader.split(' ')[1];
+                if (!token) return res.sendStatus(401);
+
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        return res.sendStatus(401);
+                    }
+                })
+
+                idUser = Auth.tokenData(req).id_account;
+            }
+
+            let result;
+            if (idUser === false) result = await Account.selectId(id);
+            else result = await Account.selectIdStatus(id, idUser);
 
             res.status(200).json({
                 message: 'Đã tìm thấy tài khoản',
