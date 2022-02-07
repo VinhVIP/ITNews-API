@@ -144,11 +144,11 @@ router.get('/bookmark', Auth.authenGTUser, async (req, res, next) => {
         else postsId = await Bookmark.list(accId);
 
         let data = [];
-        let acc = await Account.selectId(accId);
-
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
+            let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
+            
             data.push({
                 post: post,
                 author: acc,
