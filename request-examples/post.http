@@ -55,17 +55,17 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo4LC
 
 
 ### Lấy danh sách bài viết NHÁP
-GET http://localhost:8000/api/v1/post/drafts
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI1ODg4LCJleHAiOjE2MzA3Mjk0ODh9.MGOkihM9f5bDD8vJD_qsNAcJO76RAghAHVUVDbLEBx4
+GET http://localhost:8000/api/v1/post/drafts?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
 
 ### Lấy danh sách bài viết PUBLIC
-GET http://localhost:8000/api/v1/post/public
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
+GET http://localhost:8000/api/v1/post/public?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
 
 
 ### Lấy danh sách bài viết UNLISTED: Chỉ có link mới xem
-GET http://localhost:8000/api/v1/post/unlisted
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNTcxMzIzLCJleHAiOjE2MzA1NzQ5MjN9.3iStQoos9L_QrAHpWluRw6AFRKB28dY0sj9KqJvTWxg
+GET http://localhost:8000/api/v1/post/unlisted?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
 
 ### Lấy danh sách UP vote của bài viết
 GET http://localhost:8000/api/v1/post/2/voteup

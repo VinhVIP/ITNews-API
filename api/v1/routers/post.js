@@ -19,8 +19,13 @@ var FollowAccount = require('../module/follow_account');
  */
 router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getDraftPosts(accId);
+
+        let postsId;
+        if (page) postsId = await Post.getDraftPosts(accId, page);
+        else postsId = await Post.getDraftPosts(accId);
+
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
@@ -50,8 +55,14 @@ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/public', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getPublicPosts(accId);
+
+        let postsId;
+        if (page) postsId = await Post.getPublicPosts(accId, page);
+        else postsId = await Post.getPublicPosts(accId);
+
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
@@ -82,8 +93,13 @@ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getUnlistedPosts(accId);
+        let postsId;
+        if (page) postsId = await Post.getUnlistedPosts(accId, page);
+        else postsId = await Post.getUnlistedPosts(accId);
+
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
@@ -274,7 +290,7 @@ router.get('/trending', async (req, res, next) => {
     try {
         let page = req.query.page;
         let postsId;
-        if(page) postsId = await Post.getTrending(page);
+        if (page) postsId = await Post.getTrending(page);
         else postsId = await Post.getTrending();
 
         let data = [];
@@ -315,7 +331,7 @@ router.get('/following', Auth.authenGTUser, async (req, res, next) => {
         let id_account = Auth.tokenData(req).id_account;
         let postsId;
         let page = req.query.page;
-        if(page) postsId = await Post.getFollowing(id_account, page);
+        if (page) postsId = await Post.getFollowing(id_account, page);
         else postsId = await Post.getFollowing(id_account);
 
         let data = [];
