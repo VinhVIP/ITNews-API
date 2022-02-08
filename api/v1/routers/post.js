@@ -10,6 +10,7 @@ var Vote = require('../module/vote');
 var Notification = require('../module/notification');
 var FollowAccount = require('../module/follow_account');
 var Bookmark = require('../module/bookmark');
+const e = require('express');
 
 
 /**
@@ -31,7 +32,7 @@ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
         let acc = await Account.selectId(accId);
 
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
@@ -70,7 +71,7 @@ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
         let acc = await Account.selectId(accId);
 
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
@@ -109,7 +110,7 @@ router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
         let acc = await Account.selectId(accId);
 
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
@@ -145,10 +146,10 @@ router.get('/bookmark', Auth.authenGTUser, async (req, res, next) => {
 
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
-            
+
             data.push({
                 post: post,
                 author: acc,
@@ -293,6 +294,19 @@ router.get('/search', async (req, res, next) => {
  */
 router.get('/newest', async (req, res, next) => {
     try {
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
         let page = req.query.page;
         let postsId;
 
@@ -304,7 +318,10 @@ router.get('/newest', async (req, res, next) => {
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post;
+            if (idUser) post = await Post.selectIdForUser(id_post, idUser);
+            else post = await Post.selectIdForUser(id_post);
+
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 
@@ -333,6 +350,19 @@ router.get('/newest', async (req, res, next) => {
  */
 router.get('/trending', async (req, res, next) => {
     try {
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
         let page = req.query.page;
         let postsId;
         if (page) postsId = await Post.getTrending(page);
@@ -343,7 +373,10 @@ router.get('/trending', async (req, res, next) => {
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post;
+            if (idUser) post = await Post.selectIdForUser(id_post, idUser);
+            else post = await Post.selectIdForUser(id_post);
+
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 
@@ -384,7 +417,7 @@ router.get('/following', Auth.authenGTUser, async (req, res, next) => {
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post = await Post.selectIdForUser(id_post, id_account);
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 

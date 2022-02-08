@@ -50,7 +50,7 @@ GET http://localhost:8000/api/v1/post/newest?page=1
 
 ### Lấy danh sách bài viết bookmark theo trang
 GET http://localhost:8000/api/v1/post/bookmark?page=1
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjE4NTcwLCJleHAiOjE2NDYyOTIxNzB9.8JrgfG1Y7UkNnZ-SjbgG0VtVsb74fKtegaQBbiTfr5k
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0Mjg1MDIzLCJleHAiOjE2NDYzNTg2MjN9.IbAbOxtCzbWpclej2y0NRFbdJgFO1nPxEV5NVDtkVSw
 
 
 ### Lấy danh sách bài viết từ tài khoản và tag follow theo trang
