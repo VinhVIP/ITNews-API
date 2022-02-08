@@ -208,6 +208,47 @@ router.get('/browse', Auth.authenGTModer, async (req, res, next) => {
     }
 })
 
+/**
+ * Lấy các bài viết spam
+ * 
+ * @permission  Moder trở lên 
+ * @return      200: Thành công. trả về danh sách bài viết
+ */
+ router.get('/spam', Auth.authenGTModer, async (req, res, next) => {
+    try {
+        let page = req.query.page;
+
+        let postsId;
+        if(page) postsId = await Post.getPostsSpam(page);
+        else postsId = await Post.getPostsSpam();
+
+        let data = [];
+
+        for (let i = 0; i < postsId.length; i++) {
+            let id_post = postsId[i].id_post;
+
+            let post = await Post.selectId(id_post);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            })
+        }
+
+        res.status(200).json({
+            message: `Lấy danh sách bài viết spam thành công thành công`,
+            data: data
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
 
 /**
  * Lấy TẤT CẢ các bài viết public mới nhất 
