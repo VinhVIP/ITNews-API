@@ -480,14 +480,25 @@ db.getPostsByStatus = (status) => {
     })
 }
 
-db.getPostsForBrowse = () => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post P WHERE P.status=0 and P.access=1 ORDER BY P.created",
-            [], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
+db.getPostsForBrowse = (page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post P WHERE P.status=0 and P.access=1 ORDER BY P.created",
+                [], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post P WHERE P.status=0 and P.access=1 ORDER BY P.created LIMIT 10 OFFSET $1",
+                [(page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
 }
 
 module.exports = db;

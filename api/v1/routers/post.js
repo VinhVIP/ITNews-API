@@ -175,7 +175,11 @@ router.get('/bookmark', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/browse', Auth.authenGTModer, async (req, res, next) => {
     try {
-        let postsId = await Post.getPostsForBrowse();
+        let page = req.query.page;
+
+        let postsId;
+        if(page) postsId = await Post.getPostsForBrowse(page);
+        else postsId = await Post.getPostsForBrowse();
 
         let data = [];
 
