@@ -34,8 +34,9 @@ router.post('/:id_post/:type', Auth.authenGTUser, async (req, res, next) => {
 
             let voteExists = await Vote.has(id_account, id_post);
             if (voteExists) {
-                return res.status(400).json({
-                    message: 'Bài viết đã được vote trước đó'
+                await Vote.update(id_account, id_post, type);
+                return res.status(200).json({
+                    message: 'Thay đổi loại vote thành công'
                 })
             }
 

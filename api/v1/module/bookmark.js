@@ -32,18 +32,33 @@ db.delete = (id_account, id_post) => {
     })
 }
 
-db.list = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`SELECT P.*
-        FROM post P
-        INNER JOIN bookmark B
-        ON P.id_post=B.id_post
-        WHERE B.id_account=$1 order by P.created desc`,
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
+db.list = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`SELECT P.*
+            FROM post P
+            INNER JOIN bookmark B
+            ON P.id_post=B.id_post
+            WHERE B.id_account=$1 order by P.created desc`,
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`SELECT P.*
+            FROM post P
+            INNER JOIN bookmark B
+            ON P.id_post=B.id_post
+            WHERE B.id_account=$1 order by P.created desc LIMIT 10 OFFSET $2`,
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
 }
 
 module.exports = db;

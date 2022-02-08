@@ -11,6 +11,7 @@ db.selectId = (id) => {
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
         false as bookmark_status,
         (select count(*) from comment C where C.id_post=$1) as total_comment,
+        null as vote_type,
         (select count(*) from vote V where V.id_post=$1 and V.type=0) as total_vote_down,
         (select count(*) from vote V where V.id_post=$1 and V.type=1) as total_vote_up,
         (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
@@ -33,6 +34,7 @@ db.selectIdForUser = (id_post, id_user) => {
         TO_CHAR(last_modified :: date, 'dd/mm/yyyy') as day_last_modified,
         (select exists(select * from bookmark where id_post=$1 and id_account=$2)) as bookmark_status,
         (select count(*) from comment C where C.id_post=$1) as total_comment,
+        (select type from vote where id_post=$1 and id_account=$2) as vote_type,
         (select count(*) from vote V where V.id_post=$1 and V.type=0) as total_vote_down,
         (select count(*) from vote V where V.id_post=$1 and V.type=1) as total_vote_up,
         (select count(*) from bookmark B where B.id_post=$1) as total_bookmark
@@ -203,32 +205,61 @@ db.deletePostTag = (id_post) => {
     })
 }
 
-db.getTrending = () => {
-    return new Promise((resolve, reject) => {
-        pool.query(`select P.id_post, count(P.id_post) rating
-        from post P, vote V 
-        where P.id_post=V.id_post 
-        group by P.id_post
-        order by rating desc`,
-            [],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
+db.getTrending = (page = 0) => {
+    if (page == 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select P.id_post, count(P.id_post) rating
+            from post P, vote V 
+            where P.id_post=V.id_post 
+            group by P.id_post
+            order by rating desc`,
+                [],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
 
-    })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select P.id_post, count(P.id_post) rating
+            from post P, vote V 
+            where P.id_post=V.id_post 
+            group by P.id_post
+            order by rating desc
+            LIMIT 10 OFFSET $1`,
+                [(page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+
+        })
+    }
 }
 
-db.getNewest = () => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",
-            [],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
+db.getNewest = (page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC",
+                [],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
 
-    })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE status=1 AND access=1 ORDER BY created DESC LIMIT 10 OFFSET $1",
+                [(page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+
+        })
+    }
 }
 
 db.getAllNewest = () => {
@@ -257,85 +288,176 @@ db.getSearch = (search) => {
     })
 }
 
-db.getFollowing = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`(SELECT P.*
-            FROM post P
-            INNER JOIN post_tag PT ON P.id_post=PT.id_post
-            WHERE PT.id_tag IN (
-                SELECT FT.id_tag
-                FROM follow_tag FT
-                WHERE FT.id_account=$1
-            )
-            ORDER BY P.created DESC)
-            UNION
-            (SELECT P.*
+db.getFollowing = (id_account, page = 0) => {
+    if (page == 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`(SELECT P.*
+                FROM post P
+                INNER JOIN post_tag PT ON P.id_post=PT.id_post
+                WHERE PT.id_tag IN (
+                    SELECT FT.id_tag
+                    FROM follow_tag FT
+                    WHERE FT.id_account=$1
+                    ) AND P.status=1 AND P.access=1
+                )
+                UNION
+                (SELECT P.*
                     FROM post P
                     INNER JOIN follow_account F ON F.id_follower=P.id_account
                     WHERE F.id_following=$1 AND P.status=1 AND P.access=1 
-                    ORDER BY P.created DESC )
+                )
+                ORDER BY created DESC
+                `,
+                [id_account],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`(SELECT P.*
+                FROM post P
+                INNER JOIN post_tag PT ON P.id_post=PT.id_post
+                WHERE PT.id_tag IN (
+                    SELECT FT.id_tag
+                    FROM follow_tag FT
+                    WHERE FT.id_account=$1
+                    ) AND P.status=1 AND P.access=1 
+                )
+                UNION
+                (SELECT P.*
+                    FROM post P
+                    INNER JOIN follow_account F ON F.id_follower=P.id_account
+                    WHERE F.id_following=$1 AND P.status=1 AND P.access=1 
+                )
+                ORDER BY created DESC
+                LIMIT 10 OFFSET $2
+                `,
+                [id_account, (page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+        })
+    }
+
+}
+
+db.getListPostIdOfAccount = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC",
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC LIMIT 10 OFFSET $2",
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
+}
+
+db.getDraftPosts = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=0 ORDER BY id_post DESC",
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=0 ORDER BY id_post DESC  LIMIT 10 OFFSET $2",
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
+}
+
+db.getPublicPosts = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=1 ORDER BY id_post DESC",
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=1 ORDER BY id_post DESC LIMIT 10 OFFSET $2",
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
+}
+
+db.getUnlistedPosts = (id_account, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=2 ORDER BY id_post DESC",
+                [id_account], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=2 ORDER BY id_post DESC LIMIT 10 OFFSET $2",
+                [id_account, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        })
+    }
+
+}
+
+db.getPostOfTag = (id_tag, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`SELECT P.id_post
+            FROM post p
+            JOIN post_tag PT ON P.id_post = PT.id_post
+            WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
+            ORDER BY P.created DESC
             `,
-            [id_account],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
-    })
-}
+                [id_tag], (err, result) => {
+                    if (err) return reject(err)
+                    return resolve(result.rows)
+                })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`SELECT P.id_post
+            FROM post p
+            JOIN post_tag PT ON P.id_post = PT.id_post
+            WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
+            ORDER BY P.created DESC
+            LIMIT 10 OFFSET $2
+            `,
+                [id_tag, (page - 1) * 10], (err, result) => {
+                    if (err) return reject(err)
+                    return resolve(result.rows)
+                })
+        })
+    }
 
-db.getListPostIdOfAccount = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE id_account=$1 AND status=1 AND access=1 ORDER BY id_post DESC",
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
-}
-
-db.getDraftPosts = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=0 ORDER BY id_post DESC",
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
-}
-
-db.getPublicPosts = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=1 ORDER BY id_post DESC",
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
-}
-
-db.getUnlistedPosts = (id_account) => {
-    return new Promise((resolve, reject) => {
-        pool.query("SELECT id_post FROM post WHERE id_account=$1 AND access=2 ORDER BY id_post DESC",
-            [id_account], (err, result) => {
-                if (err) return reject(err);
-                return resolve(result.rows);
-            })
-    })
-}
-
-db.getPostOfTag = (id_tag) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`SELECT P.id_post
-        FROM post p
-        JOIN post_tag PT ON P.id_post = PT.id_post
-        WHERE PT.id_tag=$1 AND P.access=1 AND P.status=1
-        ORDER BY P.created DESC
-        `,
-            [id_tag], (err, result) => {
-                if (err) return reject(err)
-                return resolve(result.rows)
-            })
-    })
 }
 
 db.getTotalView = (id_account) => {

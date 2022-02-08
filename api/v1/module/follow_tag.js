@@ -49,6 +49,23 @@ db.list = (id_account) => {
     })
 }
 
+db.listStatus = (id_account_follow_tag, id_account_find) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`select T.*, 
+            (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
+            (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
+            (select exists(select * from follow_tag FT where T.id_tag=FT.id_tag and FT.id_account=$2)) as status
+            from tag T
+            where (select exists(select * from follow_tag FT where T.id_tag=FT.id_tag and FT.id_account=$1))=true
+            `,
+            [id_account_follow_tag, id_account_find], (err, result) => {
+                if (err) return reject(err);
+                console.log(result);
+                return resolve(result.rows);
+            })
+    })
+}
+
 db.deleteAll = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query("DELETE FROM follow_tag WHERE id_account=$1", [id_account], (err, result) => {

@@ -3,17 +3,17 @@ POST http://localhost:8000/api/v1/account/login
 Content-Type: application/json
 
 {
-    "account_name": "vinhvip",
-    "password": "123456"
+    "account_name": "vinhit",
+    "password": "123"
 }
 
 ### Lấy tất cả tài khoản
-GET http://localhost:8000/api/v1/account/all
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MywiYWNjb3VudF9uYW1lIjoidmluaGl0Iiwic3RhdHVzIjowLCJpYXQiOjE2Mzg0MDkyMjIsImV4cCI6MTY0MDQ4MjgyMn0.ovjE1uSMFZWwx2w-Q5BnjpTEha6aKgh1uHR6P5dEls4
+GET http://localhost:8000/api/v1/account/all?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQyOTA2ODI0LCJleHAiOjE2NDQ5ODA0MjR9.MWK1LYnlUB5_omlAlJ_FnjMcFV8mX1UqZoeC8LctbAw
 
 ### Lấy thông tin tài khoản, oc status
-GET http://localhost:8000/api/v1/account/1/status
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MywiYWNjb3VudF9uYW1lIjoidmluaGl0Iiwic3RhdHVzIjowLCJpYXQiOjE2Mzg0MDkyMjIsImV4cCI6MTY0MDQ4MjgyMn0.ovjE1uSMFZWwx2w-Q5BnjpTEha6aKgh1uHR6P5dEls4
+GET http://localhost:8000/api/v1/account/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MTk5NDc0LCJleHAiOjE2NDYyNzMwNzR9.jIVabmrlQ8lotHxjwTXbOfJ6CLs8Ft7Lh6frH-IQ3BA
 
 
 ### Tạo tài khoản
@@ -63,17 +63,17 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLC
 
 
 ### Lấy tất cả bài viết cùa tài khoản
-GET http://localhost:8000/api/v1/account/1/posts
+GET http://localhost:8000/api/v1/account/60/posts?page=2
 
 
 ### Lấy danh sách các bookmark
-GET http://localhost:8000/api/v1/account/1/bookmarks
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50IjoxLCJpZF9yb2xlIjoxLCJhY2NvdW50X25hbWUiOiJhZG1pbiIsInN0YXR1cyI6MCwiaWF0IjoxNjMwNzI0MjA1LCJleHAiOjE2MzA3Mjc4MDV9.jhYPQzcNO1L2FJJ-elPBW1K8o6EBT_gaLJupX0WClaQ
+GET http://localhost:8000/api/v1/account/1/bookmarks?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjE4NTcwLCJleHAiOjE2NDYyOTIxNzB9.8JrgfG1Y7UkNnZ-SjbgG0VtVsb74fKtegaQBbiTfr5k
 
 
 ### Lấy danh sách các tag đang follow
-GET http://localhost:8000/api/v1/account/8/follow_tag
-
+GET http://localhost:8000/api/v1/account/1/follow_tag
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQzMzc4MjU0LCJleHAiOjE2NDU0NTE4NTR9.Wv1bk7VFnyx1X-BZYgCVYIDwQ6EH3-1gHlKorqF3EtQ
 
 ### Lấy danh sách các tài khoản đang được người có id này theo dõi
 GET http://localhost:8000/api/v1/account/1/follower

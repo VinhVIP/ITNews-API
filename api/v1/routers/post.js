@@ -9,6 +9,8 @@ var Account = require('../module/account');
 var Vote = require('../module/vote');
 var Notification = require('../module/notification');
 var FollowAccount = require('../module/follow_account');
+var Bookmark = require('../module/bookmark');
+const e = require('express');
 
 
 /**
@@ -19,16 +21,23 @@ var FollowAccount = require('../module/follow_account');
  */
 router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getDraftPosts(accId);
+
+        let postsId;
+        if (page) postsId = await Post.getDraftPosts(accId, page);
+        else postsId = await Post.getDraftPosts(accId);
+
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
@@ -50,16 +59,24 @@ router.get('/drafts', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/public', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getPublicPosts(accId);
+
+        let postsId;
+        if (page) postsId = await Post.getPublicPosts(accId, page);
+        else postsId = await Post.getPublicPosts(accId);
+
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
@@ -82,21 +99,66 @@ router.get('/public', Auth.authenGTUser, async (req, res, next) => {
  */
 router.get('/unlisted', Auth.authenGTUser, async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         let accId = Auth.tokenData(req).id_account;
-        let postsId = await Post.getUnlistedPosts(accId);
+        let postsId;
+        if (page) postsId = await Post.getUnlistedPosts(accId, page);
+        else postsId = await Post.getUnlistedPosts(accId);
+
         let data = [];
+        let acc = await Account.selectId(accId);
+
         for (let i = 0; i < postsId.length; i++) {
-            let post = await Post.selectId(postsId[i].id_post);
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
-
             });
         }
 
         res.status(200).json({
             message: 'Lấy danh sách bài viết nháp thành công',
+            data: data
+        })
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+/**
+ * Lấy tất cả các bài viết bản thân đã bookmark
+ * 
+ * @permission  Đăng nhập mới được thực hiện
+ * @return      200: Thành công, trả về danh sách bài viết
+ */
+router.get('/bookmark', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let page = req.query.page;
+
+        let accId = Auth.tokenData(req).id_account;
+        let postsId;
+        if (page) postsId = await Bookmark.list(accId, page);
+        else postsId = await Bookmark.list(accId);
+
+        let data = [];
+        for (let i = 0; i < postsId.length; i++) {
+            let post = await Post.selectIdForUser(postsId[i].id_post, accId);
+            let acc = await Account.selectId(post.id_account);
+            let tags = await Post.selectTagsOfPost(postsId[i].id_post);
+
+            data.push({
+                post: post,
+                author: acc,
+                tags: tags
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách bài viết bookmark thành công',
             data: data
         })
     } catch (error) {
@@ -232,14 +294,34 @@ router.get('/search', async (req, res, next) => {
  */
 router.get('/newest', async (req, res, next) => {
     try {
-        let postsId = await Post.getNewest();
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
+        let page = req.query.page;
+        let postsId;
+
+        if (page) postsId = await Post.getNewest(page);
+        else postsId = await Post.getNewest();
 
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post;
+            if (idUser) post = await Post.selectIdForUser(id_post, idUser);
+            else post = await Post.selectIdForUser(id_post);
+
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 
@@ -268,14 +350,33 @@ router.get('/newest', async (req, res, next) => {
  */
 router.get('/trending', async (req, res, next) => {
     try {
-        let postsId = await Post.getTrending();
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
+        let page = req.query.page;
+        let postsId;
+        if (page) postsId = await Post.getTrending(page);
+        else postsId = await Post.getTrending();
 
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post;
+            if (idUser) post = await Post.selectIdForUser(id_post, idUser);
+            else post = await Post.selectIdForUser(id_post);
+
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 
@@ -306,14 +407,17 @@ router.get('/trending', async (req, res, next) => {
 router.get('/following', Auth.authenGTUser, async (req, res, next) => {
     try {
         let id_account = Auth.tokenData(req).id_account;
-        let postsId = await Post.getFollowing(id_account);
+        let postsId;
+        let page = req.query.page;
+        if (page) postsId = await Post.getFollowing(id_account, page);
+        else postsId = await Post.getFollowing(id_account);
 
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post = await Post.selectIdForUser(id_post, id_account);
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 

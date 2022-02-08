@@ -228,10 +228,15 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
 router.get('/:id/posts', async (req, res, next) => {
     try {
         let { id } = req.params;
+        let page = req.query.page;
 
         let tagExists = await Tag.has(id);
         if (tagExists) {
-            let postsId = await Post.getPostOfTag(id);
+            let postsId;
+            
+            if (page) postsId = await Post.getPostOfTag(id, page);
+            else postsId = await Post.getPostOfTag(id);
+
             let data = [];
 
             for (let i = 0; i < postsId.length; i++) {

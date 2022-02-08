@@ -22,6 +22,7 @@ const Information = require('../module/information');
 
 var Auth = require('../../../auth');
 const e = require('express');
+const { selectIdStatus } = require('../module/account');
 const storage = multer.diskStorage({
     destination: './uploads',
     filename: function (req, file, cb) {
@@ -443,7 +444,7 @@ router.post('/:id/confirm', async (req, res, next) => {
 })
 
 /**
- * Đổi password của cá nhân
+ * Đổi password của cá nhân (bỏ đi, hãy dùng v2 phía dưới)
  * @params      id: để chơi, không dùng đến (để 1 số bất kỳ thì nó cũng hoạt động dc)
  * 
  * @body        
@@ -498,6 +499,61 @@ router.put('/:id/change_password', Auth.authenGTUser, async (req, res, next) => 
     }
 });
 
+
+/**
+ * Đổi password của cá nhân (đã chỉnh sửa - version 2)
+ * 
+ * @body        old_password, new_password
+ * @permisson   Người đang đăng nhập
+ * @return      200: Đổi thành công
+ *              400: Thiếu dữ liệu
+ *              403: Mật khẩu cũ không chính xác
+ */
+router.put('/change/password', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let new_password = req.body.new_password;
+        let old_password = req.body.old_password;
+        let id_account = Auth.tokenData(req).id_account;
+
+        if (old_password !== "") {
+            let acc = await Account.selectId(id_account);
+            acc = await Account.selectByUsername(acc.account_name);
+            let match = await bcrypt.compare(old_password, acc.password);
+
+            if (match) {
+                if (new_password !== "") {
+                    bcrypt.hash(new_password, saltRounds, async (err, hash) => {
+                        new_password = hash;
+                        let changePassword = await Account.updatePassword(id_account, new_password);
+
+                        return res.status(200).json({
+                            message: 'Thay đổi mật khẩu thành công',
+                        })
+                    });
+                } else {
+                    return res.status(400).json({
+                        message: 'Mật khẩu mới không được bỏ trống'
+                    });
+                }
+            } else {
+                return res.status(403).json({
+                    message: 'Mật khẩu cũ không chính xác!'
+                })
+
+            }
+
+        } else {
+            return res.status(400).json({
+                message: 'Thiếu mật khẩu cũ!'
+            })
+        }
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+});
+
 /**
  * Thêm 1 tài khoản thường
  * 
@@ -519,14 +575,14 @@ router.post('/', async (req, res, next) => {
                 }
 
                 let accountNameExists = await Account.hasByUsername(account_name);
-                if(accountNameExists){
+                if (accountNameExists) {
                     return res.status(400).json({
                         message: 'Tên tài khoản đã tồn tại!'
                     })
                 }
 
                 let emailExists = await Account.hasEmail(email);
-                if(emailExists){
+                if (emailExists) {
                     return res.status(400).json({
                         message: 'Email này đã được sử dụng!'
                     })
@@ -583,9 +639,9 @@ router.put('/:id', Auth.authenGTUser, async (req, res, next) => {
 
         let birth = null;
 
-        if(req.body.birth === null || req.body.birth === ''){
+        if (req.body.birth === null || req.body.birth === '') {
             birth = null;
-        }else{
+        } else {
             let date = checkDate(req.body.birth)
             if (date === false) {
                 return res.status(400).json({
@@ -722,14 +778,18 @@ router.get('/:id_account/avatar', async (req, res, next) => {
 /**
  * Lấy danh sách tất cả tài khoản
  * 
- * @permission Chỉ Moder trở lên mới được thực thi
+ * @permission 
  */
 router.get('/all', async (req, res, next) => {
     try {
+        let page = req.query.page;
+
         const authorizationHeader = req.headers['authorization'];
 
         let list = [];
-        let ids = await Account.selectAllId();
+        let ids;
+        if (page) ids = await Account.selectAllId(page);
+        else ids = await Account.selectAllId();
 
         if (authorizationHeader) {
             const token = authorizationHeader.split(' ')[1];
@@ -832,7 +892,27 @@ router.get('/:id', async (req, res, next) => {
         let accountExists = await Account.has(id);
 
         if (accountExists) {
-            let result = await Account.selectId(id);
+
+            const authorizationHeader = req.headers['authorization'];
+            let idUser = false;
+
+            if (authorizationHeader) {
+                const token = authorizationHeader.split(' ')[1];
+                if (!token) return res.sendStatus(401);
+
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        return res.sendStatus(401);
+                    }
+                })
+
+                idUser = Auth.tokenData(req).id_account;
+            }
+
+            let result;
+            if (idUser === false) result = await Account.selectId(id);
+            else result = await Account.selectIdStatus(id, idUser);
 
             res.status(200).json({
                 message: 'Đã tìm thấy tài khoản',
@@ -925,13 +1005,21 @@ router.get('/:id/role', async (req, res, next) => {
 router.get('/:id/posts', async (req, res, next) => {
     try {
         let idAcc = req.params.id;
-        let postsId = await Post.getListPostIdOfAccount(idAcc);
+        let page = req.query.page;
+
+        let acc = await Account.selectId(idAcc);
+
+        let postsId;
+        if (page) postsId = await Post.getListPostIdOfAccount(idAcc, page);
+        else postsId = await Post.getListPostIdOfAccount(idAcc);
+
         let data = [];
         for (let i = 0; i < postsId.length; i++) {
             let post = await Post.selectId(postsId[i].id_post);
             let tags = await Post.selectTagsOfPost(postsId[i].id_post);
             data.push({
                 post: post,
+                author: acc,
                 tags: tags
             });
         }
@@ -955,10 +1043,14 @@ router.get('/:id/posts', async (req, res, next) => {
 router.get('/:id/bookmarks', async (req, res, next) => {
     try {
         let id = req.params.id;
+        let page = req.query.page;
 
         let accExists = await Account.has(id);
         if (accExists) {
-            let postsId = await Bookmark.list(id);
+            let postsId;
+            if (page) postsId = await Bookmark.list(id, page);
+            else postsId = await Bookmark.list(id);
+            
             let data = [];
             for (let i = 0; i < postsId.length; i++) {
                 let post = await Post.selectId(postsId[i].id_post);
@@ -997,9 +1089,29 @@ router.get('/:id/follow_tag', async (req, res, next) => {
     try {
         let id = req.params.id;
 
+        const authorizationHeader = req.headers['authorization'];
+
+        let idUser = false;
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(401);
+                }
+            })
+
+            idUser = Auth.tokenData(req).id_account;
+        }
+
         let accExists = await Account.has(id);
         if (accExists) {
-            let result = await FollowTag.list(id);
+            let result;
+            if (idUser === false) result = await FollowTag.list(id);
+            else result = await FollowTag.listStatus(id, idUser);
 
             res.status(200).json({
                 message: 'Lấy danh sách các thẻ mà tài khoản theo dõi thành công',
@@ -1011,7 +1123,6 @@ router.get('/:id/follow_tag', async (req, res, next) => {
             })
         }
     } catch (error) {
-        console.log(error);
         res.sendStatus(500);
     }
 })
@@ -1023,7 +1134,7 @@ router.get('/:id/follow_tag', async (req, res, next) => {
  * @return      200: Thành công, trả về danh sách tài khoản 
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/following', async (req, res, next) => {
+router.get('/:id/follower', async (req, res, next) => {
     try {
         let id = req.params.id;
 
@@ -1078,7 +1189,7 @@ router.get('/:id/following', async (req, res, next) => {
  * @return      200: Thành công, trả về danh sách tài khoản 
  *              404: Tài khoản không tồn tại
  */
-router.get('/:id/follower', async (req, res, next) => {
+router.get('/:id/following', async (req, res, next) => {
     try {
         let id = req.params.id;
 
@@ -1260,7 +1371,7 @@ router.put('/change/information', Auth.authenGTUser, async (req, res, next) => {
         }
 
         let birth = null;
-        if(req.body.birth !== '') birth = req.body.birth;
+        if (req.body.birth !== '') birth = req.body.birth;
 
         var account = {
             'real_name': req.body.real_name ?? '',
