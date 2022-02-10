@@ -39,7 +39,7 @@ db.list = (id_account, page = 0) => {
             FROM post P
             INNER JOIN bookmark B
             ON P.id_post=B.id_post
-            WHERE B.id_account=$1 order by P.created desc`,
+            WHERE B.id_account=$1 order by B.bookmark_time desc`,
                 [id_account], (err, result) => {
                     if (err) return reject(err);
                     return resolve(result.rows);
@@ -51,7 +51,7 @@ db.list = (id_account, page = 0) => {
             FROM post P
             INNER JOIN bookmark B
             ON P.id_post=B.id_post
-            WHERE B.id_account=$1 order by P.created desc LIMIT 10 OFFSET $2`,
+            WHERE B.id_account=$1 order by B.bookmark_time desc LIMIT 10 OFFSET $2`,
                 [id_account, (page - 1) * 10], (err, result) => {
                     if (err) return reject(err);
                     return resolve(result.rows);

@@ -26,7 +26,7 @@ db.changeParent = (id_cmt)=>{
 
 db.addCommentWithParent = (id_account, id_post, id_parent, content) =>{
     return new Promise((resolve, reject)=>{
-        pool.query("INSERT INTO comment (id_account, id_post, id_cmt_parent, content, date_time, status) VALUES ($1, $2, $3, $4, current_date, 0) RETURNING *",
+        pool.query("INSERT INTO comment (id_account, id_post, id_cmt_parent, content, status) VALUES ($1, $2, $3, $4, 0) RETURNING *",
         [id_account, id_post, id_parent, content],
         (err, result)=>{
             if (err) return reject(err);

@@ -1064,7 +1064,7 @@ router.get('/:id/bookmarks', async (req, res, next) => {
             }
 
             res.status(200).json({
-                message: 'Lấy danh sách bài viết nháp thành công',
+                message: 'Lấy danh sách bài viết bookmark thành công',
                 data: data
             })
         } else {
