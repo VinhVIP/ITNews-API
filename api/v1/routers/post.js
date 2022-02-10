@@ -918,7 +918,7 @@ router.put('/:id/status/:status_new', Auth.authenGTModer, async (req, res, next)
                 let name = author.real_name;
                 let id_followers = await FollowAccount.listFollowingOf(poster.id_account);
                 for (let id_follower of id_followers) {
-                    Notification.addNotification(id_follower.id_following, `${name} đã đăng một bài viết mới`, `/post/${id}`)
+                    Notification.addNotification(id_follower.id_following, `${name} đã đăng một bài viết mới: ${poster.title}`, `/post/${id}`)
                 }
             }
 
