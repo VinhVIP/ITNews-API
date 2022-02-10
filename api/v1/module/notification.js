@@ -93,6 +93,20 @@ db.listNotification = (id_account) => {
     })
 }
 
+db.listAllNotification = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query(`SELECT *
+        FROM notification 
+        WHERE id_account = $1
+        ORDER BY id_notification desc`,
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows)
+            })
+    })
+}
+
 db.amount = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT id_notification FROM notification WHERE id_account = $1',

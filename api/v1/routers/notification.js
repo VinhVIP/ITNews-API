@@ -56,6 +56,25 @@ router.get('/all', Auth.authenGTUser, async (req, res, next) => {
         let id_account = Auth.tokenData(req).id_account;
         let data = await Notification.listNotification(id_account);
         return res.status(200).json({
+            message: 'List thông báo chưa đọc thành công',
+            data: data,
+        });
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+});
+
+/**
+ * Lấy tất cả thông báo 
+ * @permisson   Tải khoản được tạo
+ * 
+ * @return      200: Lấy thành công
+ */
+router.get('/list', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let data = await Notification.listAllNotification(id_account);
+        return res.status(200).json({
             message: 'List thông báo thành công',
             data: data,
         });
