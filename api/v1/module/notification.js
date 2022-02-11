@@ -46,6 +46,28 @@ db.readNotification = (id_notificatioin) => {
     })
 }
 
+db.readAllNotification = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE notification SET status = 1 WHERE id_account = $1',
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0])
+            })
+    })
+}
+
+db.deleteAllNotification = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query('DELETE FROM notification WHERE id_account = $1',
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0])
+            })
+    })
+}
+
 db.selectUrl = (id_notificatioin) => {
     return new Promise((resolve, reject) => {
         pool.query('SELECT link FROM notification WHERE id_notification = $1',

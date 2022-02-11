@@ -84,6 +84,44 @@ router.get('/list', Auth.authenGTUser, async (req, res, next) => {
 });
 
 /**
+ * Đánh dấu đã đọc tất cả thông báo của user
+ * @permisson   Đăng nhập
+ * 
+ * @return      200: thành công
+ */
+router.get('/read_all', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let data = await Notification.readAllNotification(id_account);
+        return res.status(200).json({
+            message: 'Đánh dấu đọc tất cả thông báo thành công',
+            data: data,
+        });
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+});
+
+/**
+ * Xóa tất cả thông báo của user
+ * @permisson   Đăng nhập
+ * 
+ * @return      200: thành công
+ */
+router.delete('/delete_all', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let data = await Notification.deleteAllNotification(id_account);
+        return res.status(200).json({
+            message: 'Xóa tất cả thông báo thành công',
+            data: data,
+        });
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+});
+
+/**
  * Vô thông báo để xác nhận đã xem
  * @permisson   Tài khoản đã tạo
  *              
