@@ -46,6 +46,25 @@ router.delete('/:id_notification', Auth.authenGTUser, async (req, res, next) => 
 });
 
 /**
+ * Lấy số lượng
+ * @permisson   Đăng nhập
+ * 
+ * @return      200: Lấy thành công
+ */
+ router.get('/count', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let count = await Notification.countUnreadNotification(id_account);
+        return res.status(200).json({
+            message: 'Lấy số lượng thông báo chưa đọc',
+            data: count,
+        });
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+});
+
+/**
  * Lấy thông báo theo trang
  * @permisson   Tải khoản được tạo
  * 

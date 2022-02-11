@@ -2,6 +2,17 @@ const pool = require('../../../database');
 
 const db = {};
 
+db.countUnreadNotification = (id_account) => {
+    return new Promise((resolve, reject) => {
+        pool.query('select count(*) from notification where id_account=$1 and status=0',
+            [id_account],
+            (err, result) => {
+                if (err) return reject(err);
+                return resolve(result.rows[0].count);
+            });
+    });
+}
+
 db.addNotification = (id_account, content, link) => {
     return new Promise((resolve, reject) => {
         pool.query('INSERT INTO notification (id_account, content, link) VALUES ($1, $2, $3) returning id_notification',

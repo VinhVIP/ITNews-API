@@ -10,3 +10,8 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MC
 ### Xóa tất cả thông báo
 DELETE http://localhost:8000/api/v1/notification/delete_all
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0NDc3NjU2LCJleHAiOjE2NDY1NTEyNTZ9.kv3VB1JQnQmucFwAqa9R-w7ePJ4O9pUsGCNkmzUbVdA
+
+
+### Lấy số lượng thông báo chưa đọc
+GET http://localhost:8000/api/v1/notification/count
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0NDc3NjU2LCJleHAiOjE2NDY1NTEyNTZ9.kv3VB1JQnQmucFwAqa9R-w7ePJ4O9pUsGCNkmzUbVdA
