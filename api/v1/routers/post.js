@@ -178,7 +178,7 @@ router.get('/browse', Auth.authenGTModer, async (req, res, next) => {
         let page = req.query.page;
 
         let postsId;
-        if(page) postsId = await Post.getPostsForBrowse(page);
+        if (page) postsId = await Post.getPostsForBrowse(page);
         else postsId = await Post.getPostsForBrowse();
 
         let data = [];
@@ -214,12 +214,12 @@ router.get('/browse', Auth.authenGTModer, async (req, res, next) => {
  * @permission  Moder trở lên 
  * @return      200: Thành công. trả về danh sách bài viết
  */
- router.get('/spam', Auth.authenGTModer, async (req, res, next) => {
+router.get('/spam', Auth.authenGTModer, async (req, res, next) => {
     try {
         let page = req.query.page;
 
         let postsId;
-        if(page) postsId = await Post.getPostsSpam(page);
+        if (page) postsId = await Post.getPostsSpam(page);
         else postsId = await Post.getPostsSpam();
 
         let data = [];
@@ -303,14 +303,34 @@ router.get('/search', async (req, res, next) => {
 
         k = k.toLowerCase();
 
-        let postsId = await Post.getSearch(k);
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
+        let page = req.query.page;
+        let postsId;
+
+        if (page) postsId = await Post.getSearch(k, page);
+        else postsId = await Post.getSearch(k);
 
         let data = [];
 
         for (let i = 0; i < postsId.length; i++) {
             let id_post = postsId[i].id_post;
 
-            let post = await Post.selectId(id_post);
+            let post;
+            if (idUser) post = await Post.selectIdForUser(id_post, idUser);
+            else post = await Post.selectIdForUser(id_post);
+
             let acc = await Account.selectId(post.id_account);
             let tags = await Post.selectTagsOfPost(id_post);
 

@@ -274,18 +274,34 @@ db.getAllNewest = () => {
     })
 }
 
-db.getSearch = (search) => {
-    return new Promise((resolve, reject) => {
-        pool.query(`select id_post
-        from post
-        where status=1 and access=1 and (lower(title) like $1 or lower(content) like $1)`,
-            ['%' + search + '%'],
-            (err, postResult) => {
-                if (err) return reject(err);
-                return resolve(postResult.rows)
-            });
+db.getSearch = (search, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_post
+            from post
+            where status=1 and access=1 and (lower(title) like $1 or lower(content) like $1)`,
+                ['%' + search + '%'],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
 
-    })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_post
+            from post
+            where status=1 and access=1 and (lower(title) like $1 or lower(content) like $1)
+            LIMIT 10 OFFSET $2`,
+                ['%' + search + '%', (page - 1) * 10],
+                (err, postResult) => {
+                    if (err) return reject(err);
+                    return resolve(postResult.rows)
+                });
+
+        })
+    }
+
 }
 
 db.getFollowing = (id_account, page = 0) => {
