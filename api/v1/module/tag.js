@@ -44,7 +44,7 @@ db.getSearch = (search, page = 0) => {
         return new Promise((resolve, reject) => {
             pool.query(`select id_tag
             from tag
-            where lower(name) like $1 LIMIT 10 OFFSET $1`,
+            where lower(name) like $1 LIMIT 10 OFFSET $2`,
                 ['%' + search + '%', (page - 1) * 10],
                 (err, result) => {
                     if (err) return reject(err);
