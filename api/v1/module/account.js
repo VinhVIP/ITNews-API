@@ -103,6 +103,32 @@ db.selectAllByAccount = (id_account) => {
     });
 }
 
+db.getSearch = (search, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_account
+                from account
+                where (lower(account_name) like $1 or lower(real_name) like $1)`,
+                ['%' + search + '%'],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_account
+                from account
+                where (lower(account_name) like $1 or lower(real_name) like $1) LIMIT 10 OFFSET $1`,
+                ['%' + search + '%', (page - 1) * 10],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    }
+}
+
 db.selectAvatar = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`SELECT avatar FROM account WHERE id_account = $1`,
