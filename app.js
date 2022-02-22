@@ -3,6 +3,12 @@ const app = express();
 const dotenv = require('dotenv');
 const db = require('./database');
 
+// Swagger UI
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 dotenv.config();
 
 const apiUrl = '/api/v1';
