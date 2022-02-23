@@ -11,8 +11,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 dotenv.config();
 
-const apiUrl = '/api/v1';
-
 app.use(express.json());
 
 // for parsing application/x-www-form-urlencoded
@@ -46,7 +44,9 @@ app.use((error, req, res, next) => {
 });
 
 
-// My API
+// ----- My API V1
+const apiUrl = '/api/v1';
+
 
 // Upload file
 // app.use('/img', require('./api/v0/routers/file'));
@@ -90,6 +90,55 @@ app.use(`${apiUrl}/information`, require('./api/v1/routers/information'));
 
 //feedback
 app.use(`${apiUrl}/feedback`, require('./api/v1/routers/feedback'));
+
+
+
+// ----- My API V2
+const apiUrl2 = '/api/v2';
+
+
+// Upload file
+// app.use('/img', require('./api/v0/routers/file'));
+
+
+// Account
+app.use(`${apiUrl2}/account`, require('./api/v2/routers/account'));
+
+// Role
+app.use(`${apiUrl2}/role`, require('./api/v2/routers/role'));
+
+// Tag
+app.use(`${apiUrl2}/tag`, require('./api/v2/routers/tag'));
+
+// Post
+app.use(`${apiUrl2}/post`, require('./api/v2/routers/post'));
+
+// Vote
+app.use(`${apiUrl2}/vote`, require('./api/v2/routers/vote'));
+
+// Bookmark
+app.use(`${apiUrl2}/bookmark`, require('./api/v2/routers/bookmark'));
+
+// Follow Tag
+app.use(`${apiUrl2}/follow_tag`, require('./api/v2/routers/follow_tag'));
+
+// Follow Account
+app.use(`${apiUrl2}/follow_account`, require('./api/v2/routers/follow_account'));
+
+// Comment
+app.use(`${apiUrl2}/post`, require('./api/v2/routers/comment'));
+
+// update image
+app.use(`${apiUrl2}/image`, require('./api/v2/routers/image'));
+
+// notification
+app.use(`${apiUrl2}/notification`, require('./api/v2/routers/notification'));
+
+// information
+app.use(`${apiUrl2}/information`, require('./api/v2/routers/information'));
+
+//feedback
+app.use(`${apiUrl2}/feedback`, require('./api/v2/routers/feedback'));
 
 
 module.exports = app;
