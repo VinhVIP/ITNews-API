@@ -19,6 +19,7 @@ const Notification = require('../module/notification');
 const Verification = require('../module/verification');
 const Mailer = require('../../../mail');
 const Information = require('../module/information');
+const MyDrive = require('../../../drive');
 
 var Auth = require('../../../auth');
 const e = require('express');
@@ -1304,44 +1305,59 @@ router.patch('/:id/revive', Auth.authenAdmin, async (req, res, next) => {
     });
 });
 
+
 /**
- * Cập nhật logo
+ * Cập nhật logo ver 2
  * @body   image
  */
-router.put('/update/avatar', Auth.authenGTUser, upload.single('image'), async (req, res, next) => {
+router.put('/update/avatar', Auth.authenGTUser, async (req, res, next) => {
     try {
-        let file = req.file;
-        let id_account = Auth.tokenData(req).id_account;
+        if (req.files) {
+            let file = req.files.image;
 
-        if (!file) {
-            return res.status(400).json({
-                message: 'Tải file không thành công'
-            });
-        } else {
-            let old_image = await Account.selectAvatar(id_account);
-            let default_avatar = await Information.selectAvatar();
-            if (default_avatar != old_image) {
-                fs.unlinkSync(old_image);
+            if (!file) {
+                return res.status(400).json({
+                    message: 'Tải file không thành công'
+                });
+            } else {
+                let id_account = Auth.tokenData(req).id_account;
+
+                let idImage = await MyDrive.uploadImage(file, id_account);
+
+                if (!idImage) {
+                    return res.status(400).json({
+                        message: "Lỗi upload avatar"
+                    })
+                } else {
+                    let oldPath = await Account.selectAvatar(id_account);
+                    let oldImageId = getImageId(oldPath);
+
+                    let deleteOldImage = await MyDrive.deleteFiles(oldImageId);
+
+                    let path = "https://drive.google.com/uc?export=view&id=" + idImage;
+                    let update = await Account.updateAvatar(id_account, path);
+
+                    return res.status(200).json({
+                        message: "cập nhật avatar thành công: "
+                    })
+                }
             }
-            let update = await Account.updateAvatar(id_account, file.path);
-            return res.status(200).json({
-                message: "cập nhật avatar thành công"
-            })
+        } else {
+            return res.status(400).json({
+                message: 'Không có hình ảnh được tải lên'
+            });
         }
+
     } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
 })
 
-// router.('', async(req, res, next)=>{
-//     try{
-
-//     }catch(err){
-//         console.log(err);
-//         return res.sendStatus(500);
-//     }
-// })
+function getImageId(path) {
+    let pos = path.lastIndexOf('=');
+    return path.substr(pos + 1);
+}
 
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); }
 

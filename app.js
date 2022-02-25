@@ -1,12 +1,18 @@
 const express = require('express');
+const bodyParser = require('body-parser')
+const fileUpload = require('express-fileupload');
+
 const app = express();
 const dotenv = require('dotenv');
 const db = require('./database');
+
+// const drive = require('./drive');
 
 // Swagger UI
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
+app.use(fileUpload());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 dotenv.config();
@@ -19,6 +25,12 @@ app.use(express.urlencoded({ extended: true }));
 // for parsing multipart/form-data
 // app.use(upload.array());
 app.use(express.static('public'));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
 
 
 app.use((req, res, next) => {
