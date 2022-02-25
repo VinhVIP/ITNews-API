@@ -1,8 +1,11 @@
 ### Get all tags
 GET http://localhost:8000/api/v1/tag/all
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
+
 
 ### Lấy thẻ theo ID
-GET http://localhost:8000/api/v1/tag/4
+GET http://localhost:8000/api/v1/tag/1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
 
 ### Tạo thẻ mới
 POST http://localhost:8000/api/v1/tag
@@ -25,3 +28,7 @@ Content-Type: application/json
 
 ### Lấy danh sách bài viết có thẻ id và trang
 GET http://localhost:8000/api/v1/tag/1/posts?page=1
+
+### Tìm kiếm thẻ
+GET http://localhost:8000/api/v1/tag/search?k=a
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0

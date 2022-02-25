@@ -829,6 +829,66 @@ router.get('/all', async (req, res, next) => {
 });
 
 /**
+ * Tìm kiếm tài khoản theo từ khóa
+ * 
+ * @permission 
+ * @return      200: Trả về danh sách
+ */
+ router.get('/search', async (req, res, next) => {
+    try {
+        let { k } = req.query;
+        if (!k || k.trim().length == 0) {
+            return res.status(400).json({
+                message: "Chưa có từ khóa tìm kiếm"
+            })
+        }
+
+        k = k.toLowerCase();
+
+        let page = req.query.page;
+
+        const authorizationHeader = req.headers['authorization'];
+
+        let list = [];
+        let ids;
+        if (page) ids = await Account.getSearch(k, page);
+        else ids = await Account.getSearch(k);
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(403);
+                }
+            })
+
+            let idUser = Auth.tokenData(req).id_account;
+
+            for (let accId of ids) {
+                let acc = await Account.selectIdStatus(accId.id_account, idUser);
+                list.push(acc)
+            }
+        } else {
+            for (let accId of ids) {
+                let acc = await Account.selectId(accId.id_account);
+                list.push(acc)
+            }
+        }
+        return res.status(200).json({
+            message: 'Tìm kiếm danh sách tài khoản thành công',
+            data: list
+        });
+        // }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500)
+    }
+});
+
+/**
  * Lấy danh sách tất cả tài khoản, kiểm tra xem ng dùng hiện tại có đang follow tài khoản hay không
  * 
  * @permission Chỉ Moder trở lên mới được thực thi
@@ -1064,7 +1124,7 @@ router.get('/:id/bookmarks', async (req, res, next) => {
             }
 
             res.status(200).json({
-                message: 'Lấy danh sách bài viết nháp thành công',
+                message: 'Lấy danh sách bài viết bookmark thành công',
                 data: data
             })
         } else {

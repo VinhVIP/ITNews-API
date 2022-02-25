@@ -60,16 +60,11 @@ CREATE TABLE verification(
 	id_verification serial PRIMARY KEY,
 	id_account serial,
 	code text,
-	create_time timestamp without time zone default CURRENT_TIMESTAMP,
-	end_time timestamp without time zone default CURRENT_TIMESTAMP,
-
+	create_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
+	end_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 
 	FOREIGN KEY (id_account) REFERENCES account(id_account)
 );
-	-- nếu có database r
-	alter table verification add end_time timestamp without time zone default CURRENT_TIMESTAMP
- 
-
 
 -- Khóa tài khoản --
 
@@ -79,15 +74,13 @@ CREATE TABLE lock_account(
 	id_account_boss serial,
 	-- id_account_boss: id người ra lệnh khóa
 	reason text,
-	time_start_lock timestamp without time zone default CURRENT_TIMESTAMP,
+	time_start_lock timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 	hours_lock smallint,
-	time_end_lock timestamp without time zone default CURRENT_TIMESTAMP,
+	time_end_lock timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 
 	FOREIGN KEY (id_account_lock) REFERENCES account(id_account),
 	FOREIGN KEY (id_account_boss) REFERENCES account(id_account)
 );
-	-- nếu có database r
-	alter table lock_account add time_end_lock timestamp without time zone default CURRENT_TIMESTAMP
 
 
 -- Tạo bảng thẻ: TAGS --
@@ -112,8 +105,8 @@ CREATE TABLE post(
 	id_account serial,
 	title varchar(100) NOT NULL,
 	content text NOT NULL,
-	created timestamp without time zone default CURRENT_TIMESTAMP,
-	last_modified timestamp without time zone default CURRENT_TIMESTAMP,
+	created timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
+	last_modified timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 	view integer default 0,
 	status smallint default 0,
 	-- status: 
@@ -166,7 +159,7 @@ CREATE TABLE comment(
 	id_account serial NOT NULL,
 	id_post serial NOT NULL,
 	content text NOT NULL,
-	date_time timestamp without time zone default CURRENT_TIMESTAMP NOT NULL,
+	date_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()) NOT NULL,
 	id_cmt_parent integer default 0,
 	status smallint default 0,
 	-- status:
@@ -218,7 +211,7 @@ VALUES
 CREATE TABLE bookmark(
 	id_account serial,
 	id_post serial,
-
+	bookmark_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 	PRIMARY KEY (id_account, id_post),
 
 	FOREIGN KEY (id_account) REFERENCES account(id_account),
@@ -236,6 +229,7 @@ VALUES
 CREATE TABLE follow_tag(
 	id_account serial,
 	id_tag serial,
+	follow_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 
 	PRIMARY KEY(id_account, id_tag),
 
@@ -257,6 +251,7 @@ VALUES
 CREATE TABLE follow_account(
 	id_follower serial,
 	id_following serial,
+	follow_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 
 	PRIMARY KEY(id_follower, id_following),
 
@@ -277,6 +272,7 @@ CREATE TABLE notification(
 	content text NOT NULL,
 	link text,
 	status smallint default 0,
+	notification_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()),
 
 	FOREIGN KEY (id_account) REFERENCES account(id_account)
 );
@@ -324,7 +320,7 @@ CREATE TABLE feedback (
 	id_account serial NOT NULL,
 	subject text,
 	content text,
-	date_time timestamp without time zone default CURRENT_TIMESTAMP NOT NULL,
+	date_time timestamp without time zone default timezone('Asia/Ho_Chi_Minh'::text, now()) NOT NULL,
 	status smallint default 0,
 	-- status
 		-- 0: chua doc

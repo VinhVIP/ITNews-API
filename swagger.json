@@ -1,0 +1,129 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "1.0.0",
+		"title": "Sample spec",
+		"description": "Sample spec for Swagger",
+		"termsOfService": "http://swagger.io/terms/"
+	},
+	"basePath": "/api/v1",
+	"tags": [
+		{
+			"name": "account",
+			"description": "API for Account"
+		},
+		{
+			"name": "post",
+			"description": "API for Post"
+		},
+		{
+			"name": "tag",
+			"description": "API for Tag"
+		}
+	],
+	"schemes": [
+		"http",
+		"https"
+	],
+	"consumes": [
+		"application/json"
+	],
+	"produces": [
+		"application/json"
+	],
+	"securityDefinitions": {
+		"bearerAuth": {
+			"type": "apiKey",
+			"scheme": "bearer",
+			"bearerFormat": "JWT",
+			"name": "Authorization",
+			"in": "header"
+		}
+	},
+	"paths": {
+		"/account/login": {
+			"post": {
+				"tags": [
+					"account"
+				],
+				"summary": "Đăng nhập",
+				"description": "",
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"description": "Thông tin đăng nhập",
+						"required": true,
+						"schema": {
+							"$ref": "#definitions/LoginInfo"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Đăng nhập thành công"
+					}
+				}
+			}
+		},
+		"/account/all": {
+			"get": {
+				"tags": [
+					"account"
+				],
+				"summary": "Lấy danh sách tất cả tài khoản",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "Lấy danh sách thành công"
+					}
+				}
+			}
+		},
+		"/account/{id}": {
+			"get": {
+				"tags": [
+					"account"
+				],
+				"summary": "Lấy thông tin 1 tài khoản theo id",
+				"description": "",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"description": "ID Tài khoản cần lấy thông tin",
+						"required": true,
+						"type": "integer",
+						"format": "int64"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Lấy thông tin tài khoản thành công"
+					},
+					"404": {
+						"description": "Không tìm thấy tài khoản"
+					}
+				},
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				]
+			}
+		}
+	},
+	"definitions": {
+		"LoginInfo": {
+			"type": "object",
+			"properties": {
+				"account_name": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

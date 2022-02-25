@@ -6,7 +6,8 @@ db.selectAll = () => {
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
                 (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
-                (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower
+                (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
+                false as status,
                 from tag T order by T.id_tag`, [], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
@@ -14,7 +15,7 @@ db.selectAll = () => {
     })
 }
 
-db.selectAllByAccount = (id_account) =>{
+db.selectAllByAccount = (id_account) => {
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
                 (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
@@ -25,6 +26,33 @@ db.selectAllByAccount = (id_account) =>{
             return resolve(result.rows);
         })
     })
+}
+
+db.getSearch = (search, page = 0) => {
+    if (page === 0) {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_tag
+                from tag
+                where lower(name) like $1`,
+                ['%' + search + '%'],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    } else {
+        return new Promise((resolve, reject) => {
+            pool.query(`select id_tag
+            from tag
+            where lower(name) like $1 LIMIT 10 OFFSET $2`,
+                ['%' + search + '%', (page - 1) * 10],
+                (err, result) => {
+                    if (err) return reject(err);
+                    return resolve(result.rows);
+                })
+        });
+    }
+
 }
 
 db.has = (id) => {
@@ -40,15 +68,12 @@ db.selectId = (id) => {
     return new Promise((resolve, reject) => {
         pool.query(`select T.*, 
                 (select count(*) from post_tag PT, post P where T.id_tag=$1 and T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
-                (select count(*) from follow_tag FT where T.id_tag=$1 and T.id_tag=FT.id_tag) total_follower
+                (select count(*) from follow_tag FT where T.id_tag=$1 and T.id_tag=FT.id_tag) total_follower,
+                false as status
                 from tag T
                 where T.id_tag=$1`, [id], (err, result) => {
             if (err) return reject(err);
-            if (result.rowCount > 0) {
-                return resolve({ status: true, data: result.rows[0] });
-            } else {
-                return resolve({ status: false });
-            }
+            return resolve(result.rows[0]);
         })
     })
 }
@@ -62,11 +87,7 @@ db.selectIdByAccount = (id_tag, id_account) => {
                 from tag T
                 where T.id_tag=$1`, [id_tag, id_account], (err, result) => {
             if (err) return reject(err);
-            if (result.rowCount > 0) {
-                return resolve({ status: true, data: result.rows[0] });
-            } else {
-                return resolve({ status: false });
-            }
+            return resolve(result.rows[0]);
         })
     })
 }

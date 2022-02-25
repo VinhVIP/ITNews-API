@@ -50,7 +50,7 @@ GET http://localhost:8000/api/v1/post/newest?page=1
 
 ### Lấy danh sách bài viết bookmark theo trang
 GET http://localhost:8000/api/v1/post/bookmark?page=1
-Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0Mjg1MDIzLCJleHAiOjE2NDYzNTg2MjN9.IbAbOxtCzbWpclej2y0NRFbdJgFO1nPxEV5NVDtkVSw
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0NDc3NjU2LCJleHAiOjE2NDY1NTEyNTZ9.kv3VB1JQnQmucFwAqa9R-w7ePJ4O9pUsGCNkmzUbVdA
 
 
 ### Lấy danh sách bài viết từ tài khoản và tag follow theo trang
@@ -93,3 +93,14 @@ Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MC
 GET http://localhost:8000/api/v1/post/trending?page=1
 Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQxNDgwOTQ2LCJleHAiOjE2NDM1NTQ1NDZ9.zl7WzWBIycxgA_wrEbtto3oInLv-FrcHXSTxVybgsf0
 
+### 
+GET http://localhost:8000/api/v1/post/browse?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
+
+### 
+GET http://localhost:8000/api/v2/post/spam?page=1
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0
+
+### Search
+GET http://localhost:8000/api/v1/post/search?k=vinh&page=2
+Authorization: Beaer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF9hY2NvdW50Ijo2MCwiaWRfcm9sZSI6MSwiYWNjb3VudF9uYW1lIjoidmluaGl0IiwiaWF0IjoxNjQ0MjQyODc4LCJleHAiOjE2NDYzMTY0Nzh9.kV30ABaK52hIpMiA4L9NnMvDpZypNXnYcFCfLOflgT0

@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 var Auth = require('../../../auth');
 
 var Tag = require('../module/tag');
 var Post = require('../module/post');
 var Account = require('../module/account');
+const e = require('express');
 
 /**
  * Lấy tất cả thẻ
@@ -14,7 +16,23 @@ var Account = require('../module/account');
  */
 router.get('/all', async (req, res, next) => {
     try {
-        let result = await Tag.selectAll();
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
+        let result;
+        if (idUser) result = await Tag.selectAllByAccount(idUser);
+        else result = await Tag.selectAll();
+
         res.status(200).json({
             message: 'Lấy danh sách thẻ thành công',
             data: result
@@ -24,6 +42,66 @@ router.get('/all', async (req, res, next) => {
         res.sendStatus(500);
     }
 })
+
+/**
+ * Tìm kiếm thẻ theo từ khóa
+ * 
+ * @permission 
+ * @return      200: Trả về danh sách
+ */
+router.get('/search', async (req, res, next) => {
+    try {
+        let { k } = req.query;
+        if (!k || k.trim().length == 0) {
+            return res.status(400).json({
+                message: "Chưa có từ khóa tìm kiếm"
+            })
+        }
+
+        k = k.toLowerCase();
+
+        let page = req.query.page;
+
+        const authorizationHeader = req.headers['authorization'];
+
+        let list = [];
+        let ids;
+        if (page) ids = await Tag.getSearch(k, page);
+        else ids = await Tag.getSearch(k);
+
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (!token) return res.sendStatus(401);
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    return res.sendStatus(403);
+                }
+            })
+
+            let idUser = Auth.tokenData(req).id_account;
+
+            for (let tagId of ids) {
+                let acc = await Tag.selectIdByAccount(tagId.id_tag, idUser);
+                list.push(acc)
+            }
+        } else {
+            for (let tagId of ids) {
+                let acc = await Tag.selectId(tagId.id_tag);
+                list.push(acc)
+            }
+        }
+        return res.status(200).json({
+            message: 'Tìm kiếm danh sách thẻ thành công',
+            data: list
+        });
+        // }
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500)
+    }
+});
 
 /**
  * Lấy tất cả thẻ và thông tin trạng thái theo dõi thẻ của người dùng hiện tại
@@ -74,11 +152,28 @@ router.get('/:id_account/all', async (req, res, next) => {
  */
 router.get('/:id', async (req, res, next) => {
     try {
-        let result = await Tag.selectId(req.params.id);
-        if (result.status) {
+        let idUser = false;
+        const authorizationHeader = req.headers['authorization'];
+        if (authorizationHeader) {
+            const token = authorizationHeader.split(' ')[1];
+            if (token) {
+                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+                    if (!err) {
+                        idUser = Auth.tokenData(req).id_account;
+                    }
+                })
+            }
+        }
+
+        let tagExists = await Tag.has(req.params.id);
+        if (tagExists) {
+            let result;
+            if (idUser) result = await Tag.selectIdByAccount(req.params.id, idUser);
+            else result = await Tag.selectId(req.params.id);
+
             res.status(200).json({
                 message: 'Lấy tag thành công',
-                data: result.data
+                data: result
             })
         } else {
             res.status(404).json({
@@ -233,7 +328,7 @@ router.get('/:id/posts', async (req, res, next) => {
         let tagExists = await Tag.has(id);
         if (tagExists) {
             let postsId;
-            
+
             if (page) postsId = await Post.getPostOfTag(id, page);
             else postsId = await Post.getPostOfTag(id);
 
