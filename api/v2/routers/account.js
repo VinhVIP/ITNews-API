@@ -1330,7 +1330,7 @@ router.put('/update/avatar', Auth.authenGTUser, async (req, res, next) => {
                     })
                 } else {
                     let oldPath = await Account.selectAvatar(id_account);
-                    let oldImageId = getImageId(oldPath);
+                    let oldImageId = MyDrive.getImageId(oldPath);
 
                     let deleteOldImage = await MyDrive.deleteFiles(oldImageId);
 
@@ -1353,11 +1353,6 @@ router.put('/update/avatar', Auth.authenGTUser, async (req, res, next) => {
         return res.sendStatus(500);
     }
 })
-
-function getImageId(path) {
-    let pos = path.lastIndexOf('=');
-    return path.substr(pos + 1);
-}
 
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); }
 

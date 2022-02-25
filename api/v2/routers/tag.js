@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 var Auth = require('../../../auth');
-
+var MyDrive = require('../../../drive');
 var Tag = require('../module/tag');
 var Post = require('../module/post');
 var Account = require('../module/account');
@@ -157,15 +157,45 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', Auth.authenGTModer, async (req, res, next) => {
     try {
+        if (!req.files) {
+            return res.status(400).json({
+                message: 'Không có logo được tải lên'
+            });
+        }
+
+        let logo = req.files.logo;
+        if (!logo) {
+            return res.status(400).json({
+                message: 'Không có logo được tải lên'
+            });
+        }
+
         let { name } = req.body;
 
         if (name) {
-            let result = await Tag.add(req.body);
+            let tagNameExists = await Tag.hasName(name);
+            if (tagNameExists) {
+                return res.status(400).json({
+                    message: 'Tên tag đã bị trùng'
+                });
+            }
 
-            res.status(201).json({
-                message: 'Tạo mới thẻ thành công',
-                data: result
-            })
+            let idLogo = await MyDrive.uploadImage(logo, name);
+            if (!idLogo) {
+                return res.status(400).json({
+                    message: "Lỗi upload logo"
+                })
+            } else {
+                let logoPath = "https://drive.google.com/uc?export=view&id=" + idLogo;
+                let result = await Tag.add(name, logoPath);
+
+                res.status(201).json({
+                    message: 'Tạo mới thẻ thành công',
+                    data: result
+                })
+            }
+
+
         } else {
             res.status(400).json({
                 message: 'Thiếu tên thẻ'
@@ -192,10 +222,32 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
         let tagExists = await Tag.has(id);
 
         if (tagExists) {
-            let { name, logo } = req.body;
+            let { name } = req.body;
 
-            if (name && logo) {
-                let result = await Tag.update(id, req.body);
+            if (name) {
+                let oldTag = await Tag.selectId(id);
+                if (name != oldTag.name) {
+                    let tagNameExists = await Tag.hasName(name);
+                    if (tagNameExists) {
+                        return res.status(400).json({
+                            message: 'Tên tag đã bị trùng'
+                        });
+                    }
+                }
+
+                let logoPath = '';
+                if (req.files && req.files.logo) {
+                    // Up logo mới
+                    let logoId = await MyDrive.uploadImage(req.files.logo, name);
+
+                    // Xóa logo cũ
+                    let oldLogoId = MyDrive.getImageId(oldTag.logo);
+                    await MyDrive.deleteFiles(oldLogoId);
+
+                    logoPath = "https://drive.google.com/uc?export=view&id=" + logoId;
+                }
+
+                let result = await Tag.update(id, name, logoPath);
 
                 res.status(200).json({
                     message: 'Cập nhật thẻ thành công',
@@ -203,12 +255,50 @@ router.put('/:id', Auth.authenGTModer, async (req, res, next) => {
                 })
             } else {
                 res.status(400).json({
-                    message: 'Thiếu dữ liệu'
+                    message: 'Tên tag không được bỏ trống'
                 })
             }
         } else {
             res.status(404).json({
                 message: 'Không tìm thấy tag để sửa'
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+})
+
+
+/**
+ * Xóa thẻ theo id
+ * @params      id
+ * @permisson   Admin
+ * @return      200: Xóa thành công
+ *              403: Thẻ đã có bài viết nên không thể xóa
+ *              404: Không tìm thấy thẻ để sửa
+ */
+router.delete('/:id', Auth.authenAdmin, async (req, res, next) => {
+    try {
+        let id = req.params.id;
+        let tagExists = await Tag.has(id);
+
+        if (tagExists) {
+            let countPostsOfTag = await Tag.countPostsOfTag(id);
+            if (countPostsOfTag > 0) {
+                return res.status(403).json({
+                    message: 'Thẻ đã có bài viết nên không thể xóa'
+                })
+            } else {
+                let deleteTag = await Tag.delete(id);
+                return res.status(200).json({
+                    message: 'Xóa thẻ thành công'
+                })
+            }
+        } else {
+            return res.status(404).json({
+                message: 'Không tìm thấy tag để xóa'
             })
         }
 

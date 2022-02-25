@@ -21,11 +21,11 @@ function bufferToStream(buffer) {
 }
 
 
-MyDrive.uploadImage = async (file, id_account) => {
+MyDrive.uploadImage = async (file, filename) => {
   const driveService = google.drive({ version: 'v3', auth });
 
   let fileMetaData = {
-    'name': id_account + '.png',
+    'name': filename + '.png',
     'parents': [FOLDER]
   }
 
@@ -87,6 +87,11 @@ MyDrive.deleteFiles = (idFile) => {
       return true;
     }
   })
+}
+
+MyDrive.getImageId = (path) => {
+  let pos = path.lastIndexOf('=');
+  return path.substr(pos + 1);
 }
 
 module.exports = MyDrive;
