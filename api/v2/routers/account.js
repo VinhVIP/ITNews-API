@@ -1338,7 +1338,8 @@ router.put('/update/avatar', Auth.authenGTUser, async (req, res, next) => {
                     let update = await Account.updateAvatar(id_account, path);
 
                     return res.status(200).json({
-                        message: "cập nhật avatar thành công: "
+                        message: "cập nhật avatar thành công: ",
+                        data: path
                     })
                 }
             }
