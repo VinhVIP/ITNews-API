@@ -1249,7 +1249,7 @@ router.put('/update/information', Auth.authenGTUser, async (req, res, next) => {
         var account = {
             'real_name': req.body.real_name ?? acc.real_name,
             'birth': birth,
-            'gender': req.body.gender ?? acc.birth,
+            'gender': req.body.gender ?? acc.gender,
             'company': req.body.company ?? acc.company,
             'phone': req.body.phone ?? acc.phone,
             'avatar': avatar,
