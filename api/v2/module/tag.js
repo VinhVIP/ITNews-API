@@ -7,7 +7,7 @@ db.selectAll = () => {
         pool.query(`select T.*, 
                 (select count(*) from post_tag PT, post P where T.id_tag=PT.id_tag and PT.id_post=P.id_post and P.status=1 and P.access=1) total_post,
                 (select count(*) from follow_tag FT where T.id_tag=FT.id_tag) total_follower,
-                false as status,
+                false as status
                 from tag T order by T.id_tag`, [], (err, result) => {
             if (err) return reject(err);
             return resolve(result.rows);
