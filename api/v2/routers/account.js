@@ -806,7 +806,7 @@ router.get('/:id/posts', async (req, res, next) => {
         let idAcc = req.params.id;
         let page = req.query.page;
 
-        let accExists = await Account.has(id);
+        let accExists = await Account.has(idAcc);
         if (accExists) {
             let acc = await Account.selectId(idAcc);
 
