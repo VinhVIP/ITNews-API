@@ -291,6 +291,10 @@ router.delete('/:id', Auth.authenAdmin, async (req, res, next) => {
                     message: 'Thẻ đã có bài viết nên không thể xóa'
                 })
             } else {
+                let tag = await Tag.selectId(id);
+                let tagLogoId = MyDrive.getImageId(tag.logo);
+                await MyDrive.deleteFiles(tagLogoId);
+
                 let deleteTag = await Tag.delete(id);
                 return res.status(200).json({
                     message: 'Xóa thẻ thành công'

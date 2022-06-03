@@ -806,7 +806,7 @@ router.get('/:id/posts', async (req, res, next) => {
         let idAcc = req.params.id;
         let page = req.query.page;
 
-        let accExists = await Account.has(id);
+        let accExists = await Account.has(idAcc);
         if (accExists) {
             let acc = await Account.selectId(idAcc);
 
@@ -1206,6 +1206,70 @@ router.put('/change/information', Auth.authenGTUser, async (req, res, next) => {
 })
 
 /**
+ * Thay đổi thông tin tài khoản, chỉ có thể đổi của chính bản thân
+ * @body        real_name, birth, gender, company, phone, avatar
+ * @permission  Đăng nhập
+ * @return      400: Thiếu thông tin bắt buộc
+ *              200: Cập nhật thành công, trả về tài khoản vừa cập nhật
+ */
+router.put('/update/information', Auth.authenGTUser, async (req, res, next) => {
+    try {
+        let id_account = Auth.tokenData(req).id_account;
+        let acc = await Account.selectId(id_account);
+
+        if (!req.body.real_name) {
+            res.status(400).json({
+                message: 'real_name là bắt buộc'
+            })
+        }
+
+        let birth = null;
+        if (req.body.birth !== '') birth = req.body.birth;
+
+        let avatar = '';
+
+        if (req.files && req.files.avatar) {
+            let idImage = await MyDrive.uploadImage(req.files.avatar, id_account);
+            if (!idImage) {
+                return res.status(400).json({
+                    message: "Lỗi upload avatar"
+                })
+            } else {
+                let oldPath = await Account.selectAvatar(id_account);
+                let oldImageId = MyDrive.getImageId(oldPath);
+
+                let deleteOldImage = await MyDrive.deleteFiles(oldImageId);
+
+                avatar = "https://drive.google.com/uc?export=view&id=" + idImage;
+                console.log(avatar);
+
+            }
+        }
+
+        var account = {
+            'real_name': req.body.real_name ?? acc.real_name,
+            'birth': birth,
+            'gender': req.body.gender ?? acc.gender,
+            'company': req.body.company ?? acc.company,
+            'phone': req.body.phone ?? acc.phone,
+            'avatar': avatar,
+        }
+
+        let result = await Account.update(id_account, account);
+
+        res.status(200).json({
+            message: 'Cập nhật thông tin tài khoản thành công',
+            data: result
+        })
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({
+            message: 'Something wrong'
+        })
+    }
+})
+
+/**
  * Mở khóa tài khoản
  * @params      id người muốn được mở khóa
  * @permisson   Moder trở lên
@@ -1338,7 +1402,8 @@ router.put('/update/avatar', Auth.authenGTUser, async (req, res, next) => {
                     let update = await Account.updateAvatar(id_account, path);
 
                     return res.status(200).json({
-                        message: "cập nhật avatar thành công: "
+                        message: "cập nhật avatar thành công: ",
+                        data: path
                     })
                 }
             }

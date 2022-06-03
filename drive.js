@@ -74,6 +74,7 @@ function listFiles(auth) {
 
 MyDrive.deleteFiles = (idFile) => {
   const drive = google.drive({ version: 'v3', auth });
+  console.log("delete id: "+idFile);
   drive.files.delete({
     'fileId': idFile
   }, (err, res) => {
